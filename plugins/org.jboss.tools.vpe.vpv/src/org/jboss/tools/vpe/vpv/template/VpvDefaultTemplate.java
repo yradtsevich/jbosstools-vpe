@@ -18,7 +18,9 @@ public class VpvDefaultTemplate implements VpeTemplate {
 		Node visualNode = null;
 		
 		short sourceNodeType = sourceNode.getNodeType();
-		if (sourceNodeType == Node.ELEMENT_NODE) {
+		if (sourceNodeType == Node.DOCUMENT_NODE) {
+			visualNode = visualDocument;
+		} else if (sourceNodeType == Node.ELEMENT_NODE) {
 			Element visualElement = visualDocument.createElement(sourceNode.getNodeName());
 			NamedNodeMap sourceNodeAttributes = sourceNode.getAttributes();
 			visualNode = visualElement;

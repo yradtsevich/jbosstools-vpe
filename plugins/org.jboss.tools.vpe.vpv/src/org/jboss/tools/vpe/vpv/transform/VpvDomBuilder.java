@@ -8,6 +8,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.wst.html.core.internal.document.DOMStyleModelImpl;
 import org.jboss.tools.vpe.vpv.mapping.NodeData;
 import org.jboss.tools.vpe.vpv.mapping.VpeElementData;
 import org.jboss.tools.vpe.vpv.template.VpeChildrenInfo;
@@ -31,12 +32,11 @@ public class VpvDomBuilder {
 	public VpvVisualModel buildVisualModel(Document sourceDocument) throws ParserConfigurationException {
 		Document visualDocument = createDocument();
 		Map<Node, Node> sourceVisualMapping = new HashMap<Node, Node>();
-		Element documentElement = sourceDocument.getDocumentElement();
-		Node visualRoot = convertNode(sourceDocument, documentElement, visualDocument, sourceVisualMapping);
+		convertNode(sourceDocument, sourceDocument, visualDocument, sourceVisualMapping);
 
-		if (visualRoot != null) {
-			markSubtree(visualRoot);
-			visualDocument.appendChild(visualRoot);
+		NodeList documentChildren = visualDocument.getChildNodes();
+		for (int i = 0; i < documentChildren.getLength(); i++) {
+			markSubtree(documentChildren.item(i));
 		}
 
 		VpvVisualModel visualModel = new VpvVisualModel(visualDocument, sourceVisualMapping);
@@ -195,6 +195,7 @@ public class VpvDomBuilder {
 	}
 
 	private Document createDocument() throws ParserConfigurationException {
+		new DOMStyleModelImpl();
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 		Document document = documentBuilder.newDocument();

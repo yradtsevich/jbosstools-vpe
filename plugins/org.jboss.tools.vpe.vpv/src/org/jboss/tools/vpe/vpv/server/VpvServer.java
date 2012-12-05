@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.ShellListener;
+import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.vpv.Activator;
 import org.jboss.tools.vpe.vpv.transform.VpvController;
 
