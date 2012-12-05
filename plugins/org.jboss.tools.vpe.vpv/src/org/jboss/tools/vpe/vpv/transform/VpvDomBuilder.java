@@ -4,11 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.eclipse.wst.html.core.internal.document.DOMStyleModelImpl;
+import org.eclipse.wst.xml.core.internal.document.DOMModelImpl;
 import org.jboss.tools.vpe.vpv.mapping.NodeData;
 import org.jboss.tools.vpe.vpv.mapping.VpeElementData;
 import org.jboss.tools.vpe.vpv.template.VpeChildrenInfo;
@@ -194,12 +192,9 @@ public class VpvDomBuilder {
 		return visualNode;
 	}
 
+	@SuppressWarnings("restriction")
 	private Document createDocument() throws ParserConfigurationException {
-		new DOMStyleModelImpl();
-		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-		Document document = documentBuilder.newDocument();
-		return document;
+		return new DOMModelImpl().getDocument();
 	}
 	
 	private static long getNextMarkerId() {
