@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.UUID;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -450,12 +451,15 @@ public class BrowserSim {
 				addDevicesMenuItems(contextMenu);
 				addUseSkinsItem(contextMenu);
 				addPreferencesItem(contextMenu);
-					
+				
 				new MenuItem(contextMenu, SWT.BAR);
 				addTurnMenuItems(contextMenu);
 
 				new MenuItem(contextMenu, SWT.BAR);
 				addFileMenuItems(contextMenu);
+				
+				new MenuItem(contextMenu, SWT.BAR);
+				addWeinreItem(contextMenu);
 				
 				new MenuItem(contextMenu, SWT.BAR);
 				addAboutItem(contextMenu);
@@ -572,6 +576,28 @@ public class BrowserSim {
 						String base64Source = DatatypeConverter.printBase64Binary(source.getBytes());
 						System.out.println(base64Source);
 					}
+				}
+			}
+		});
+	}
+	
+	public void addWeinreItem(Menu menu) {
+		MenuItem weinre = new MenuItem(menu, SWT.PUSH);
+		weinre.setText(Messages.BrowserSim_WEINRE);
+		weinre.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String id = UUID.randomUUID().toString();
+				skin.getBrowser().execute("var head = document.head;"
+						+	"var script = document.createElement('script');"
+						+	"head.appendChild(script);" 
+						+	"script.src='http://weinre-namespace33.rhcloud.com/target/target-script-min.js#" + id + "'");
+				URL url;
+				try {
+					url = new URL("http://weinre-namespace33.rhcloud.com/client/#" + id);
+					Program.launch(url.toString());
+				} catch (MalformedURLException e1) {
+					e1.printStackTrace();
+					ExceptionNotifier.showErrorMessage(skin.getShell(), Messages.BrowserSim_COULD_NOT_OPEN_DEFAULT_BROWSER + e1.getMessage());
 				}
 			}
 		});
@@ -925,7 +951,6 @@ public class BrowserSim {
 		}
 		return new Shell();
 	}
-
 	
 	private void addMacOsMenuApplicationHandler(CocoaUIEnhancer enhancer) {
 		
