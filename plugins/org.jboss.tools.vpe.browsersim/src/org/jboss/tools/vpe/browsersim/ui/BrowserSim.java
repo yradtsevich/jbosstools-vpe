@@ -51,6 +51,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -591,14 +592,21 @@ public class BrowserSim {
 						+	"var script = document.createElement('script');"
 						+	"head.appendChild(script);" 
 						+	"script.src='http://weinre-namespace33.rhcloud.com/target/target-script-min.js#" + id + "'");
-				URL url;
+
+				Display display = skin.getBrowser().getDisplay();
+				Shell shell = new Shell(display);
+				shell.setLayout(new FillLayout());
+				shell.setText("Weinre Inspector");
+				final Browser browser;
 				try {
-					url = new URL("http://weinre-namespace33.rhcloud.com/client/#" + id);
-					Program.launch(url.toString());
-				} catch (MalformedURLException e1) {
-					e1.printStackTrace();
-					ExceptionNotifier.showErrorMessage(skin.getShell(), Messages.BrowserSim_COULD_NOT_OPEN_DEFAULT_BROWSER + e1.getMessage());
+					browser = new Browser(shell, SWT.WEBKIT);
+				} catch (SWTError e2) {
+					System.out.println("Could not instantiate Browser: " + e2.getMessage());
+					display.dispose();
+					return;
 				}
+				shell.open();
+				browser.setUrl("http://weinre-namespace33.rhcloud.com/client/#" + id);
 			}
 		});
 	}
