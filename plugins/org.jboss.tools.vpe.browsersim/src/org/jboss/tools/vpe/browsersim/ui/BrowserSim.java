@@ -11,7 +11,11 @@
 package org.jboss.tools.vpe.browsersim.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -277,6 +281,40 @@ public class BrowserSim {
 		browser.addLocationListener(new LocationAdapter() {
 			public void changed(LocationEvent event) {
 				initOrientation(deviceOrientation.getOrientationAngle());
+			}
+		});
+		
+		browser.addLocationListener(new LocationAdapter() {
+			public void changed(LocationEvent event) {
+				if (isLivereloadServerActive()) {
+					Browser browser = (Browser) event.widget;
+					browser.execute("window.addEventListener('load', function(){" +
+								"var e = document.createElement('script');" +
+								"e.type = 'text/javascript';" +
+								"e.src = 'https://github.com/livereload/livereload-js/raw/master/dist/livereload.js?host=localhost';" +
+								"document.head.appendChild(e);" +
+							"});");
+				}
+			}
+			public boolean isLivereloadServerActive() {
+			    Socket s = null;
+			    try {
+			        s = new Socket();
+			        s.setReuseAddress(true);
+			        SocketAddress sa = new InetSocketAddress("localhost", 35729);
+			        s.connect(sa, 3000);
+			        return true;
+			    } catch (IOException e) {
+			        e.printStackTrace();
+			    } finally {
+			        if (s != null) {
+			            try {
+			                s.close();
+			            } catch (IOException e) {
+			            }
+			        }
+			    }
+			    return false;
 			}
 		});
 				
