@@ -11,6 +11,7 @@
 package org.jboss.tools.vpe.browsersim.util;
 
 import java.io.InputStream;
+import java.util.Scanner;
 
 import org.jboss.tools.vpe.browsersim.ui.BrowserSim;
 
@@ -27,5 +28,11 @@ public class ResourcesUtil {
 		} else {
 			return BrowserSim.class.getResourceAsStream(RESOURCES_ROOT_FOLDER + name);
 		}
+	}
+
+	static String getResourceAsString(String name) {
+		InputStream stream = getResourceAsStream(name);
+		Scanner scanner = new Scanner(stream).useDelimiter("\\A"); // \A=beginning of the input boundary
+		return scanner.hasNext() ? scanner.next() : "";
 	}
 }
