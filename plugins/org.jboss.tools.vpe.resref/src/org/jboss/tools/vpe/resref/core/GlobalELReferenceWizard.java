@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.resref.core;
 
+import org.jboss.tools.common.model.ui.ModelUIImages;
 import org.jboss.tools.common.resref.core.ResourceReference;
 
 public class GlobalELReferenceWizard extends ELReferenceWizard {
@@ -22,8 +23,7 @@ public class GlobalELReferenceWizard extends ELReferenceWizard {
 	@Override
 	protected void createPage() {
 		page = new GlobalElReferenceWizardPage(Messages.GLOBAL_EL_WIZARD_PAGE_NAME,
-				Messages.VRD_ADD_EL_PREFERENCE, ReferenceWizardPage
-						.getImageDescriptor(), fileLocation);
+				Messages.VRD_ADD_EL_PREFERENCE, ModelUIImages.getImageDescriptor(ModelUIImages.EL_REFERENCE_IMAGE), fileLocation);
 		page.setDescription(Messages.ADD_GLOBAL_EL_PREFERENCE_MESSAGE);
 	}
 	
