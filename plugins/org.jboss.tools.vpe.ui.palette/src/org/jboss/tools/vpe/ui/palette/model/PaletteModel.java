@@ -11,7 +11,9 @@
 package org.jboss.tools.vpe.ui.palette.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.gef.palette.PaletteContainer;
 import org.eclipse.gef.palette.PaletteEntry;
@@ -19,33 +21,41 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.common.meta.action.XActionInvoker;
 import org.jboss.tools.common.model.XModel;
 import org.jboss.tools.common.model.XModelObject;
+import org.jboss.tools.common.model.XModelObjectConstants;
 import org.jboss.tools.common.model.event.XModelTreeListener;
 import org.jboss.tools.common.model.ui.util.ModelUtilities;
 import org.jboss.tools.common.model.ui.views.palette.PaletteContents;
 import org.jboss.tools.common.model.ui.views.palette.editor.PaletteEditor;
 
 public class PaletteModel {
+	static String TYPE_MOBILE = "mobile"; //$NON-NLS-1$
+	static String TYPE_JSF = "jsf"; //$NON-NLS-1$
 	
-	private static PaletteModel instance = null;
+	private static Map<String, PaletteModel> instances = new HashMap<String, PaletteModel>();
 	private static Object monitor = new Object();
 
 	private PaletteEditor editor = new PaletteEditor();
 	private PaletteRoot paletteRoot = null;
-	private PaletteContents paletteContents = new PaletteContents(null);
+	private String type = TYPE_MOBILE;
 
 	private PaletteModel() {
 	}
 
 	public static final PaletteModel getInstance(PaletteContents contents) {
+		String[] natures = contents.getNatureTypes();
+		boolean jsf = natures != null && natures.length > 0 && natures[0].equals(TYPE_JSF);
+		String type = jsf ? TYPE_JSF : TYPE_MOBILE;
+		PaletteModel instance = instances.get(type);
 		if (instance != null) {
 			return instance;
 		} else {
 			synchronized (monitor) {
 				if (instance == null) {
 					PaletteModel inst = new PaletteModel();
-					inst.setPaletteContentsInternal(contents);
+					inst.type = type;
 					inst.createModel();
 					instance = inst;
+					instances.put(type, instance);
 				}
 			}
 			return instance;
@@ -61,7 +71,7 @@ public class PaletteModel {
 	}
 
 	private XModelObject[] findXObjects(XModelObject root, String elementType){
-		ArrayList v = new ArrayList();
+		ArrayList<XModelObject> v = new ArrayList<XModelObject>();
 		for (int i = 0; i < root.getChildren().length; i++) {
 			if (root.getChildAt(i).getAttributeValue("element type").equals(elementType)) { //$NON-NLS-1$
 				v.add(root.getChildAt(i));
@@ -71,19 +81,26 @@ public class PaletteModel {
 	}
 	
 	private XModelObject[] getGroups(XModelObject root) {
-		ArrayList v = new ArrayList();
-		collectGroups(root, v);
+		ArrayList<XModelObject> v = new ArrayList<XModelObject>();
+		collectGroups(root, v, true);
 		return (v.size() == 0) ? new XModelObject[0] : (XModelObject[])v.toArray(new XModelObject[0]);
 	}
 	
-	private void collectGroups(XModelObject o, ArrayList list) {
-		for (int i = 0; i < o.getChildren().length; i++) {
-			XModelObject c = o.getChildAt(i);
+	private void collectGroups(XModelObject o, ArrayList<XModelObject> list, boolean isRoot) {
+		XModelObject[] cs = o.getChildren();
+		for (int i = 0; i < cs.length; i++) {
+			XModelObject c = cs[i];
+			if(isRoot) {
+				String name = c.getAttributeValue(XModelObjectConstants.ATTR_NAME);
+				boolean m1 = name.toLowerCase().equals(TYPE_MOBILE);
+				boolean m2 = type.equals(TYPE_MOBILE);
+				if(m1 != m2) continue;
+			}
 			if("yes".equals(c.getAttributeValue("hidden"))) continue; //$NON-NLS-1$ //$NON-NLS-2$
 			if(PaletteModelHelper.isSubGroup(c)) {
 				list.add(c);
 			} else if (PaletteModelHelper.isGroup(c)) {
-				collectGroups(c, list);
+				collectGroups(c, list, false);
 			}
 		}
 	}
@@ -127,6 +144,9 @@ public class PaletteModel {
 	private PaletteCategory createCategory(XModelObject xcat, boolean open) {
 		PaletteCategory cat = new PaletteCategory(xcat, open);
 		cat.setVisible(isCategoryVisible(cat));
+		if(xcat.getAttributeValue(XModelObjectConstants.ATTR_NAME).startsWith("jQuery")) { //$NON-NLS-1$
+			cat.setInitialState(PaletteCategory.INITIAL_STATE_OPEN);
+		}
 		loadCategory(xcat, cat);
 		return cat;
 	}
@@ -208,31 +228,10 @@ public class PaletteModel {
 		XActionInvoker.invoke("ImportTLDToPaletteWizard", "CreateActions.ImportTLD", paletteRoot.getXModelObject(), new java.util.Properties()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private boolean setPaletteContentsInternal(PaletteContents contents) {
-		if (!paletteContents.equalsContents(contents)) {
-			if (contents != null) {
-				paletteContents = contents;
-			} else {
-				paletteContents = new PaletteContents(null);
-			}
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	private boolean isCategoryVisible(PaletteCategory cat) {
 		return true; ///paletteContents.contains(cat.getNatureTypes(), cat.getEditorTypes()); 
 	}
 
 	public void setPaletteContents(PaletteContents contents) {
-		if (!setPaletteContentsInternal(contents)) {
-			return;
-		}
-		List children = paletteRoot.getChildren();
-		for (int i = 0; i < children.size(); i++) {
-			PaletteCategory cat = (PaletteCategory)children.get(i);
-			cat.setVisible(isCategoryVisible(cat));
-		}
 	}
 }

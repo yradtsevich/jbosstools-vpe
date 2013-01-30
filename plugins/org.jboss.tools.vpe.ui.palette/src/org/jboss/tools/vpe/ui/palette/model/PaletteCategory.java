@@ -41,7 +41,10 @@ public class PaletteCategory extends PaletteDrawer implements PaletteXModelObjec
 		String label = xobject.getAttributeValue("name"); //$NON-NLS-1$
 		XModelObject p = xobject.getParent();
 		while(p != null && (PaletteModelHelper.isGroup(p) || PaletteModelHelper.isSubGroup(p))) {
-			label = p.getAttributeValue("name") + " " + label; //$NON-NLS-1$ //$NON-NLS-2$
+			String parentName = p.getAttributeValue("name");
+			if(!"Mobile".equals(parentName)) { //$NON-NLS-1$
+				label = parentName + " " + label; //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			p = p.getParent();
 		}
 		setLabel(label);
