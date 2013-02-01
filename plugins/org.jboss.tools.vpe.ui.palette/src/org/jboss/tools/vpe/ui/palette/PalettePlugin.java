@@ -13,8 +13,12 @@ package org.jboss.tools.vpe.ui.palette;
 import org.eclipse.core.runtime.IAdaptable;
 import org.jboss.tools.common.log.BaseUIPlugin;
 import org.jboss.tools.common.log.IPluginLog;
-import org.jboss.tools.common.model.ui.views.palette.IPaletteAdapter;
 
+/**
+ * Palette gef palette implementation is moved to 
+ * org.jboss.tools.jst.web.ui.palette *
+ */
+@Deprecated
 public class PalettePlugin extends BaseUIPlugin implements IAdaptable {
 
 	public static final String PLUGIN_ID = "org.jboss.tools.vpe.ui.palette"; //$NON-NLS-1$
@@ -29,9 +33,6 @@ public class PalettePlugin extends BaseUIPlugin implements IAdaptable {
 	}
 
 	public Object getAdapter(Class adapter) {
-		if (adapter == (IPaletteAdapter.class))
-			return new PaletteAdapter();
-		else
 			return null;
 	}
 	
