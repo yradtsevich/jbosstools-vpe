@@ -69,10 +69,9 @@ public class BrowserSim {
 	private static List<BrowserSim> instances;
 
 	private String homeUrl;
-	private DevicesListHolder devicesListHolder;
+	public DevicesListHolder devicesListHolder;
 	private DeviceOrientation deviceOrientation;
-	private ResizableSkinSizeAdvisor resizableSkinSizeAdvisor;
-	private BrowserSimSkin skin;
+	public BrowserSimSkin skin;
 	private ControlHandler controlHandler;
 	private ImageList imageList;
 	private Image[] icons;
@@ -381,7 +380,7 @@ public class BrowserSim {
 		}
 	}
 
-	private void initDevicesListHolder() {
+	public void initDevicesListHolder() {
 		devicesListHolder = new DevicesListHolder();
 		devicesListHolder.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
@@ -446,6 +445,10 @@ public class BrowserSim {
 		}
 
 		skin.getShell().open();
+	}
+	
+	public static Class<? extends BrowserSimSkin> getSkinClass(Device device, boolean useSkins) {
+		return SkinMap.getInstance().getSkinClass(useSkins ? device.getSkinId() : null);
 	}
 
 	@SuppressWarnings("nls")
