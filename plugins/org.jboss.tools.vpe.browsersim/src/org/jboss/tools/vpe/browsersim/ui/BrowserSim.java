@@ -147,7 +147,6 @@ public class BrowserSim {
 		});
 		shell.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
-				instances.remove(BrowserSim.this);
 				if (devicesListHolder != null) {
 					DevicesListStorage.saveUserDefinedDevicesList(devicesListHolder.getDevicesList(), currentLocation);
 				}
