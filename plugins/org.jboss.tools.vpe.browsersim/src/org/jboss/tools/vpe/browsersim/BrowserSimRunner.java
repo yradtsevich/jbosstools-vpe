@@ -17,17 +17,37 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Display;
+import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.ui.BrowserSim;
+import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
+import org.jboss.tools.vpe.browsersim.ui.Messages;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
  */
 
 public class BrowserSimRunner {
-	private static final String NOT_STANDALONE = "-not-standalone"; //$NON-NLS-1$
-	private static final String DEFAULT_URL = "about:blank"; //"http://www.w3schools.com/js/tryit_view.asp?filename=try_nav_useragent"; //$NON-NLS-1$
+	public static final String NOT_STANDALONE = "-not-standalone"; //$NON-NLS-1$
+	public static final String DEFAULT_URL = "about:blank"; //"http://www.w3schools.com/js/tryit_view.asp?filename=try_nav_useragent"; //$NON-NLS-1$
 	
 	public static void main(String[] args) {
+		if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
+			CocoaUIEnhancer.initializeMacOSMenuBar(Messages.BrowserSim_BROWSER_SIM);
+		}
+
+		BrowserSim browserSim = createBrowserSim(args);		
+		browserSim.open();
+
+		Display display = Display.getDefault();
+		while (!display.isDisposed() && display.getShells().length > 0) {
+			if (!display.readAndDispatch()) {
+				display.sleep();
+			}
+		}
+		display.dispose();
+	}
+
+	public static BrowserSim createBrowserSim(String[] args) {
 		List<String> params = new ArrayList<String>(Arrays.asList(args));
 		BrowserSim.isStandalone = !params.contains(NOT_STANDALONE);
 		if (!BrowserSim.isStandalone) {
@@ -47,15 +67,7 @@ public class BrowserSimRunner {
 			homeUrl = DEFAULT_URL;
 		}
 		
-		BrowserSim browserSim = new BrowserSim(homeUrl);		
-		browserSim.open();
-
-		Display display = Display.getDefault();
-		while (!display.isDisposed() && display.getShells().length > 0) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		}
-		display.dispose();
+		BrowserSim browserSim = new BrowserSim(homeUrl);
+		return browserSim;
 	}
 }

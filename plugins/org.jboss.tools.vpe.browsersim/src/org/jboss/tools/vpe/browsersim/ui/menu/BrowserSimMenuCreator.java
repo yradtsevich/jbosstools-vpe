@@ -44,7 +44,6 @@ public class BrowserSimMenuCreator {
 	private DevicesListHolder devicesListHolder;
 	private ControlHandler controlHandler;
 	private String homeUrl;
-	private static CocoaUIEnhancer cocoaUIEnhancer;
 	
 	public BrowserSimMenuCreator(BrowserSimSkin skin, DevicesListHolder devicesListHolder,
 			ControlHandler controlHandler, String homeUrl) {
@@ -54,17 +53,6 @@ public class BrowserSimMenuCreator {
 		this.homeUrl = homeUrl;
 	}
 	
-	/**
-	 * must be called before display is created
-	 */
-	public static void initCocoaUIEnhancer() {
-		// CocoaUIEnhancer handles connection between the About, Preferences and Quit menus in MAC OS X
-		if (cocoaUIEnhancer == null && PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
-			cocoaUIEnhancer = new CocoaUIEnhancer(Messages.BrowserSim_BROWSER_SIM);
-			cocoaUIEnhancer.initializeMacOSMenuBar();
-		}
-	}
-
 	public void addMenuBar() {
 		Menu appMenuBar = skin.getMenuBar();
 		if (appMenuBar != null) {
@@ -78,8 +66,9 @@ public class BrowserSimMenuCreator {
 		}
 		
 		// set event handlers for Mac OS X Menu-bar
+		CocoaUIEnhancer cocoaUIEnhancer = CocoaUIEnhancer.getInstance();
 		if (cocoaUIEnhancer != null) {
-			addMacOsMenuApplicationHandler();
+			addMacOsMenuApplicationHandler(cocoaUIEnhancer);
 			cocoaUIEnhancer.hookApplicationMenu(skin.getShell().getDisplay());
 		}
 	}
@@ -256,7 +245,7 @@ public class BrowserSimMenuCreator {
 		});
 	}
 
-	private void addMacOsMenuApplicationHandler() {
+	private void addMacOsMenuApplicationHandler(CocoaUIEnhancer cocoaUIEnhancer) {
 		if (cocoaUIEnhancer != null) {
 			cocoaUIEnhancer.setQuitListener(new Listener() {
 				@Override
