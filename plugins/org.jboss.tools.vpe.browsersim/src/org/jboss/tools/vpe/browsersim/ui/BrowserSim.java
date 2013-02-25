@@ -125,7 +125,6 @@ public class BrowserSim {
 
 		skin.setBrowserFactory(new WebKitBrowserFactory());
 		
-		BrowserSimMenuCreator.initCocoaUIEnhancer();
 		Display display = Display.getDefault();
 		
 		try {
@@ -184,7 +183,7 @@ public class BrowserSim {
 		menuCreator.addMenuBar();
 		setShellAttibutes();
 		
-		final BrowserSimBrowser browser = skin.getBrowser();
+		final BrowserSimBrowser browser = getBrowser();
 		controlHandler = new ControlHandlerImpl(browser);
 		skin.setControlHandler(controlHandler);
 		
@@ -345,7 +344,7 @@ public class BrowserSim {
 		browser.addLocationListener(new LocationAdapter() {
 			@Override
 			public void changed(LocationEvent event) {
-				if (skin.getBrowser().equals(getDisplay().getFocusControl()) && event.top) {
+				if (getBrowser().equals(Display.getDefault().getFocusControl()) && event.top) {
 					for (BrowserSim bs : instances) {
 						if (bs.skin != skin) {
 							bs.skin.getBrowser().setUrl(event.location);
@@ -405,10 +404,10 @@ public class BrowserSim {
 		Class<? extends BrowserSimSkin> newSkinClass = BrowserSimUtil.getSkinClass(device, devicesList.getUseSkins());
 		String oldSkinUrl = null;
 		if (newSkinClass != skin.getClass()) {
-			oldSkinUrl = skin.getBrowser().getUrl();
+			oldSkinUrl = getBrowser().getUrl();
 			Point currentLocation = skin.getShell().getLocation();
-			skin.getBrowser().removeProgressListener(progressListener);
-			skin.getBrowser().getShell().dispose();//XXX
+			getBrowser().removeProgressListener(progressListener);
+			getBrowser().getShell().dispose();//XXX
 			initSkin(newSkinClass, currentLocation);
 		}
 
@@ -438,12 +437,12 @@ public class BrowserSim {
 			}
 		});
 
-		skin.getBrowser().setDefaultUserAgent(device.getUserAgent());
+		getBrowser().setDefaultUserAgent(device.getUserAgent());
 
 		if (oldSkinUrl != null) {
-			skin.getBrowser().setUrl(oldSkinUrl); // skin (and browser instance) is changed
+			getBrowser().setUrl(oldSkinUrl); // skin (and browser instance) is changed
 		} else {
-			skin.getBrowser().refresh(); // only user agent and size of the browser is changed
+			getBrowser().refresh(); // only user agent and size of the browser is changed
 		}
 
 		skin.getShell().open();
@@ -451,7 +450,7 @@ public class BrowserSim {
 
 	@SuppressWarnings("nls")
 	private void initOrientation(int orientation) {
-		skin.getBrowser().execute("window.onorientationchange = null;" + "window.orientation = " + orientation + ";");
+		getBrowser().execute("window.onorientationchange = null;" + "window.orientation = " + orientation + ";");
 	}
 
 	private void rotateDevice(boolean counterclockwise) {
@@ -464,7 +463,7 @@ public class BrowserSim {
 		Rectangle clientArea = BrowserSimUtil.getMonitorClientArea(skin.getShell().getMonitor());
 		skin.setOrientationAndSize(orientation, browserSize, resizableSkinSizeAdvisor);
 		BrowserSimUtil.fixShellLocation(skin.getShell(), clientArea);
-		skin.getBrowser().execute("window.orientation = " + orientation + ";"
+		getBrowser().execute("window.orientation = " + orientation + ";"
 				+ "(function(){"
 				+ 		"var event = document.createEvent('Event');"
 				+ 		"event.initEvent('orientationchange', false, false);" // http://jsbin.com/azefow/6   https://developer.mozilla.org/en/DOM/document.createEvent
@@ -475,9 +474,9 @@ public class BrowserSim {
 				+	"})();"
 		);
 	}
-
-	public Display getDisplay() {
-		return skin.getShell().getDisplay();
+	
+	public BrowserSimBrowser getBrowser() {
+		return skin != null ? skin.getBrowser() : null;
 	}
 	
 	public class ControlHandlerImpl implements ControlHandler {
