@@ -28,14 +28,29 @@ import org.jboss.tools.vpe.browsersim.ui.Messages;
 
 public class BrowserSimRunner {
 	public static final String NOT_STANDALONE = "-not-standalone"; //$NON-NLS-1$
-	public static final String DEFAULT_URL = "about:blank"; //"http://www.w3schools.com/js/tryit_view.asp?filename=try_nav_useragent"; //$NON-NLS-1$
+	public static final String ABOUT_BLANK = "about:blank"; //"http://www.w3schools.com/js/tryit_view.asp?filename=try_nav_useragent"; //$NON-NLS-1$
 	
 	public static void main(String[] args) {
 		if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
 			CocoaUIEnhancer.initializeMacOSMenuBar(Messages.BrowserSim_BROWSER_SIM);
 		}
-
-		BrowserSim browserSim = createBrowserSim(args);		
+		BrowserSimArgs browserSimArgs = BrowserSimArgs.parseArgs(args);
+		BrowserSim.isStandalone = browserSimArgs.isStandalone();
+		
+		String path = browserSimArgs.getPath();
+		String url;
+		if (path != null) {
+			try {
+				new URI(path); // validate URL
+				url = path;
+			} catch (URISyntaxException e) {
+				url = ABOUT_BLANK;
+			}
+		} else {
+			url = ABOUT_BLANK;
+		}
+		
+		BrowserSim browserSim = new BrowserSim(url);
 		browserSim.open();
 
 		Display display = Display.getDefault();
@@ -45,29 +60,5 @@ public class BrowserSimRunner {
 			}
 		}
 		display.dispose();
-	}
-
-	public static BrowserSim createBrowserSim(String[] args) {
-		List<String> params = new ArrayList<String>(Arrays.asList(args));
-		BrowserSim.isStandalone = !params.contains(NOT_STANDALONE);
-		if (!BrowserSim.isStandalone) {
-			params.remove(NOT_STANDALONE);
-		}
-		
-		String homeUrl;
-		if (params.size() > 0) {
-			String lastArg = params.get(params.size() - 1);
-			try {
-				new URI(lastArg); // validate URL
-				homeUrl = lastArg;
-			} catch (URISyntaxException e) {
-				homeUrl = DEFAULT_URL;
-			}
-		} else {
-			homeUrl = DEFAULT_URL;
-		}
-		
-		BrowserSim browserSim = new BrowserSim(homeUrl);
-		return browserSim;
 	}
 }
