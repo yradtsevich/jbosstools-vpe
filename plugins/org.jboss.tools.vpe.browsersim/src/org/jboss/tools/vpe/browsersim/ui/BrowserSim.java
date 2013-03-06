@@ -50,6 +50,8 @@ import org.jboss.tools.vpe.browsersim.model.DevicesList;
 import org.jboss.tools.vpe.browsersim.model.DevicesListHolder;
 import org.jboss.tools.vpe.browsersim.model.DevicesListStorage;
 import org.jboss.tools.vpe.browsersim.ui.debug.firebug.FireBugLiteLoader;
+import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeEvent;
+import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeListener;
 import org.jboss.tools.vpe.browsersim.ui.menu.BrowserSimMenuCreator;
 import org.jboss.tools.vpe.browsersim.ui.skin.BrowserSimSkin;
 import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkinSizeAdvisor;
@@ -64,10 +66,9 @@ import org.jboss.tools.vpe.browsersim.util.ImageList;
 public class BrowserSim {
 	public static final String BROWSERSIM_PLUGIN_ID = "org.jboss.tools.vpe.browsersim"; //$NON-NLS-1$
 	private static final String[] BROWSERSIM_ICONS = {"icons/browsersim_16px.png", "icons/browsersim_32px.png", "icons/browsersim_64px.png", "icons/browsersim_128px.png", "icons/browsersim_256px.png", }; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
-
+	
 	public static boolean isStandalone;
 	private static List<BrowserSim> instances;
-
 	private String homeUrl;
 	private DevicesListHolder devicesListHolder;
 	private DeviceOrientation deviceOrientation;
@@ -78,6 +79,7 @@ public class BrowserSim {
 	private Image[] icons;
 	private Point currentLocation;
 	private ProgressListener progressListener;
+	private List<SkinChangeListener> skinChangeListenerList = new ArrayList<SkinChangeListener>();
 
 	static {
 		instances = new ArrayList<BrowserSim>();
@@ -86,7 +88,7 @@ public class BrowserSim {
 	public BrowserSim(String homeUrl) {
 		this.homeUrl = homeUrl;
 	}
-
+	
 	public void open() {
 		DevicesList devicesList = DevicesListStorage.loadUserDefinedDevicesList();
 		if (devicesList == null) {
@@ -362,6 +364,7 @@ public class BrowserSim {
 		});
 
 		instances.add(BrowserSim.this);
+		fireSkinChangeEvent();
 	}
 	
 	private void initImages() {
@@ -410,7 +413,6 @@ public class BrowserSim {
 			getBrowser().getShell().dispose();//XXX
 			initSkin(newSkinClass, currentLocation);
 		}
-
 		deviceOrientation = new DeviceOrientation(device.getWidth() < device.getHeight()
 								? DeviceOrientation.PORTRAIT
 								: DeviceOrientation.LANDSCAPE);
@@ -444,7 +446,7 @@ public class BrowserSim {
 		} else {
 			getBrowser().refresh(); // only user agent and size of the browser is changed
 		}
-
+		
 		skin.getShell().open();
 	}
 
@@ -479,6 +481,17 @@ public class BrowserSim {
 		return skin != null ? skin.getBrowser() : null;
 	}
 	
+	public void addSkinChangeListener(SkinChangeListener listener) {
+		skinChangeListenerList.add(listener);
+	}
+	
+	public void fireSkinChangeEvent() {
+		SkinChangeEvent event = new SkinChangeEvent(this, skin);
+		for (SkinChangeListener listener : skinChangeListenerList) {
+			listener.skinChanged(event);
+		}
+	}
+
 	public class ControlHandlerImpl implements ControlHandler {
 		private Browser browser;
 
