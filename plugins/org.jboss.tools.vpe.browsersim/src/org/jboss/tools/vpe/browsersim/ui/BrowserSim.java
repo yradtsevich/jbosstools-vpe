@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
@@ -39,6 +40,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
@@ -50,6 +53,7 @@ import org.jboss.tools.vpe.browsersim.model.DevicesList;
 import org.jboss.tools.vpe.browsersim.model.DevicesListHolder;
 import org.jboss.tools.vpe.browsersim.model.DevicesListStorage;
 import org.jboss.tools.vpe.browsersim.ui.debug.firebug.FireBugLiteLoader;
+import org.jboss.tools.vpe.browsersim.ui.events.ExitListener;
 import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeEvent;
 import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeListener;
 import org.jboss.tools.vpe.browsersim.ui.menu.BrowserSimMenuCreator;
@@ -80,7 +84,8 @@ public class BrowserSim {
 	private Point currentLocation;
 	private ProgressListener progressListener;
 	private List<SkinChangeListener> skinChangeListenerList = new ArrayList<SkinChangeListener>();
-
+	private List<ExitListener> exitListenerList = new ArrayList<ExitListener>();
+	
 	static {
 		instances = new ArrayList<BrowserSim>();
 	}
@@ -156,8 +161,17 @@ public class BrowserSim {
 				}
 			}
 		});
+		shell.addListener(SWT.Close, new Listener() {
 
-		final BrowserSimMenuCreator menuCreator = new BrowserSimMenuCreator(skin, devicesListHolder, controlHandler, homeUrl);
+			@Override
+			public void handleEvent(Event event) {
+				for (ExitListener e : exitListenerList) {
+					e.exit();
+				}
+			}
+		});
+
+		final BrowserSimMenuCreator menuCreator = new BrowserSimMenuCreator(skin, devicesListHolder, controlHandler, homeUrl, exitListenerList);
 		
 		shell.addShellListener(new ShellListener() {
 			@Override
@@ -481,8 +495,13 @@ public class BrowserSim {
 		return skin != null ? skin.getBrowser() : null;
 	}
 	
+	
 	public void addSkinChangeListener(SkinChangeListener listener) {
 		skinChangeListenerList.add(listener);
+	}
+	
+	public void addExitListener(ExitListener listener){
+		exitListenerList.add(listener);
 	}
 	
 	public void fireSkinChangeEvent() {
