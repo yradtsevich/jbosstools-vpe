@@ -31,6 +31,7 @@ import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ControlHandler;
 import org.jboss.tools.vpe.browsersim.ui.ManageDevicesDialog;
 import org.jboss.tools.vpe.browsersim.ui.Messages;
+import org.jboss.tools.vpe.browsersim.ui.events.ExitListener;
 import org.jboss.tools.vpe.browsersim.ui.skin.BrowserSimSkin;
 import org.jboss.tools.vpe.browsersim.util.BrowserSimUtil;
 
@@ -44,13 +45,15 @@ public class BrowserSimMenuCreator {
 	private DevicesListHolder devicesListHolder;
 	private ControlHandler controlHandler;
 	private String homeUrl;
+	private List<ExitListener> exitListenerList;
 	
 	public BrowserSimMenuCreator(BrowserSimSkin skin, DevicesListHolder devicesListHolder,
-			ControlHandler controlHandler, String homeUrl) {
+			ControlHandler controlHandler, String homeUrl, List<ExitListener> exitListenerList) {
 		this.skin = skin;
 		this.devicesListHolder = devicesListHolder;
 		this.controlHandler = controlHandler;
 		this.homeUrl = homeUrl;
+		this.exitListenerList = exitListenerList;
 	}
 	
 	public void addMenuBar() {
@@ -241,6 +244,13 @@ public class BrowserSimMenuCreator {
 		exit.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				shell.dispose();
+				fireExitEvent();
+			}
+
+			private void fireExitEvent() {
+				for(ExitListener e : exitListenerList) {
+					e.exit();
+				}
 			};
 		});
 	}
