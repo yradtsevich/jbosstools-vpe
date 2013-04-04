@@ -12,7 +12,8 @@ package org.jboss.tools.vpe.cordovasim.eclipse.callbacks;
 
 import java.io.IOException;
 
-import org.jboss.tools.vpe.cordovasim.eclipse.util.TransparentReader;
+import org.jboss.tools.vpe.browsersim.eclipse.launcher.TransparentReader;
+
 
 /**
  * @author Yahor Radtsevich (yradtsevich)
