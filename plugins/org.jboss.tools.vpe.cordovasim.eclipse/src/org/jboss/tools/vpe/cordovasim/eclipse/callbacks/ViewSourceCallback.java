@@ -31,10 +31,10 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.jboss.tools.vpe.browsersim.eclipse.launcher.TransparentReader;
 //import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.vpe.cordovasim.eclipse.Activator;
 import org.jboss.tools.vpe.cordovasim.eclipse.util.CordovaSimLauncher;
-import org.jboss.tools.vpe.cordovasim.eclipse.util.TransparentReader;
 
 /**
  * Handler for the BrowserSim commands printed to the console in the following form:

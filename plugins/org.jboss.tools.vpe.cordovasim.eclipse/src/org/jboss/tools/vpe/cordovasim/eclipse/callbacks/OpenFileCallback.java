@@ -21,9 +21,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.jboss.tools.vpe.browsersim.eclipse.launcher.TransparentReader;
 import org.jboss.tools.vpe.cordovasim.eclipse.Activator;
 import org.jboss.tools.vpe.cordovasim.eclipse.util.CordovaSimLauncher;
-import org.jboss.tools.vpe.cordovasim.eclipse.util.TransparentReader;
 
 
 /**
