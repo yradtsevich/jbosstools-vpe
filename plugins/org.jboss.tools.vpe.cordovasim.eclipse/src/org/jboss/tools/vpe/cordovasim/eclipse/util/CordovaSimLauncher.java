@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007-2012 Red Hat, Inc.
+ * Copyright (c) 2007-2013 Red Hat, Inc.
  * Distributed under license by Red Hat, Inc. All rights reserved.
  * This program is made available under the terms of the
  * Eclipse Public License v1.0 which accompanies this distribution,
@@ -11,37 +11,19 @@
 package org.jboss.tools.vpe.cordovasim.eclipse.util;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.ConfigurationScope;
-import org.eclipse.osgi.framework.internal.core.BundleFragment;
-import org.eclipse.osgi.framework.internal.core.BundleHost;
-import org.eclipse.ui.IWorkbenchListener;
-import org.eclipse.ui.PlatformUI;
-import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.BrowserSimLauncher;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.ExternalProcessCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.ExternalProcessLauncher;
-import org.jboss.tools.vpe.cordovasim.eclipse.Activator;
-import org.jboss.tools.vpe.cordovasim.eclipse.callbacks.CordovaSimCallback;
-import org.jboss.tools.vpe.cordovasim.eclipse.callbacks.OpenFileCallback;
-import org.jboss.tools.vpe.cordovasim.eclipse.callbacks.ViewSourceCallback;
-import org.osgi.framework.Bundle;
 
 /**
  * @author "Yahor Radtsevich (yradtsevich)"
  */
-@SuppressWarnings("restriction")
 public class CordovaSimLauncher {
 	public static final String CORDOVASIM_CLASS_NAME = "org.jboss.tools.vpe.cordovasim.CordovaSimRunner"; //$NON-NLS-1$
 	private static final List<ExternalProcessCallback> CORDOVASIM_CALLBACKS = BrowserSimLauncher.BROWSERSIM_CALLBACKS;
@@ -49,6 +31,9 @@ public class CordovaSimLauncher {
 	static {
 		REQUIRED_BUNDLES.addAll(BrowserSimLauncher.REQUIRED_BUNDLES);
 		REQUIRED_BUNDLES.addAll(Arrays.asList(
+			"org.jboss.tools.vpe.cordovasim",
+			"org.jboss.tools.vpe.cordovasim.ripple",
+			"org.eclipse.jetty.continuation",
 			"org.eclipse.jetty.continuation",
 			"org.eclipse.jetty.http",
 			"org.eclipse.jetty.io",
