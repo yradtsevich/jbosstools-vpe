@@ -31,7 +31,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
+//import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.vpe.browsersim.eclipse.Activator;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.BrowserSimLauncher;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.ExternalProcessCallback;
@@ -103,12 +103,12 @@ public class ViewSourceCallback implements ExternalProcessCallback {
 				// this checking is needed to do not load jst.jsp plug-ins if it is unnecessary
 				if ("org.jboss.tools.jst.jsp.jspeditor.HTMLTextEditor".equals(editorId)) { //$NON-NLS-1$
 					try {
-						if (editor instanceof JSPMultiPageEditor) {
-							JSPMultiPageEditor multiPageEditor = (JSPMultiPageEditor) editor;
-							doc = multiPageEditor.getSourceEditor().getTextViewer().getDocument();
-							doc.set(content);
-							editor.doSave(null); // reset resource-changed marker
-						}
+//						if (editor instanceof JSPMultiPageEditor) {
+//							JSPMultiPageEditor multiPageEditor = (JSPMultiPageEditor) editor;
+//							doc = multiPageEditor.getSourceEditor().getTextViewer().getDocument();
+//							doc.set(content);
+//							editor.doSave(null); // reset resource-changed marker
+//						}
 					} catch (NoClassDefFoundError e1) {
 						// this is OK - there are some optional dependencies
 						ITextEditor textEditor = null;
