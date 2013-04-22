@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
+import org.jboss.tools.common.model.ui.ModelUIImages;
 import org.jboss.tools.vpe.editor.template.VpeAnyData;
 import org.jboss.tools.vpe.editor.template.VpeTemplateManager;
 import org.jboss.tools.vpe.editor.util.Constants;
@@ -51,7 +52,7 @@ public class ExportUserTagsTemplatesWizardPage extends WizardPage implements
 		super(pageName);
 		setTitle(VpeUIMessages.EXPORT_USER_TAGS_PAGE_TITLE);
 		setDescription(VpeUIMessages.EXPORT_USER_TAGS_PAGE_DESCRIPTION);
-		setImageDescriptor(ReferenceWizardPage.getImageDescriptor());
+		setImageDescriptor(ModelUIImages.getImageDescriptor(ModelUIImages.WIZARD_EXPORT_TAG_TEMPLATE));
 		/*
 		 * Initialize tags list
 		 */

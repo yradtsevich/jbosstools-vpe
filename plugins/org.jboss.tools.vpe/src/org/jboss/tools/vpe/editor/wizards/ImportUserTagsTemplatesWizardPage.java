@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
+import org.jboss.tools.common.model.ui.ModelUIImages;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.template.VpeAnyData;
 import org.jboss.tools.vpe.editor.template.VpeTemplateManager;
@@ -57,7 +58,7 @@ public class ImportUserTagsTemplatesWizardPage extends WizardPage implements
 		this.currentList = currentList;
 		setTitle(VpeUIMessages.IMPORT_USER_TAGS_PAGE_TITLE);
 		setDescription(VpeUIMessages.IMPORT_USER_TAGS_PAGE_DESCRIPTION);
-		setImageDescriptor(ReferenceWizardPage.getImageDescriptor());
+		setImageDescriptor(ModelUIImages.getImageDescriptor(ModelUIImages.WIZARD_IMPORT_TAG_TEMPLATE));
 	}
 
 	public void createControl(Composite parent) {

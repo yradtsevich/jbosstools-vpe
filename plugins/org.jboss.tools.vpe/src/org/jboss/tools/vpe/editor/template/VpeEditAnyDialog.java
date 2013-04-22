@@ -96,7 +96,7 @@ public class VpeEditAnyDialog extends TitleAreaDialog {
 		 */
 		getShell().setText(VpeUIMessages.TEMPLATE);
 		setTitle(VpeUIMessages.TAG_ATTRIBUTES);
-		setTitleImage(ModelUIImages.getImage(ModelUIImages.WIZARD_DEFAULT)); //image is managed by registry
+		setTitleImage(ModelUIImages.getImage(ModelUIImages.WIZARD_TAG_TEMPLATE)); //image is managed by registry
 		setMessage(VpeUIMessages.USER_SPECIFIED_TAG_DIALOG_DESCRIPTION);
 		
 		/*
