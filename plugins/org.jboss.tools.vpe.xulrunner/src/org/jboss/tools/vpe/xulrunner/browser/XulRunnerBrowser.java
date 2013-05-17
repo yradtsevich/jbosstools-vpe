@@ -58,7 +58,9 @@ import org.osgi.framework.Bundle;
 public class XulRunnerBrowser implements nsIWebBrowserChrome,
 		nsIWebProgressListener, nsITooltipListener {
 	private static final String XULRUNNER_LOWER_VERSION = "1.9.1.0"; //$NON-NLS-1$
-	private static final String XULRUNNER_HIGHER_VERSION = "1.9.2.19"; //$NON-NLS-1$
+	private static final boolean XULRUNNER_LOWER_VERSION_INCLUSIVE = true;
+	private static final String XULRUNNER_HIGHER_VERSION = "2.0"; //$NON-NLS-1$
+	private static final boolean XULRUNNER_HIGHER_VERSION_INCLUSIVE = false;
 	// TODO Sergey Vasilyev Think. May be XULRUNNER_BUNDLE shouldn't be final?
 	private static final String XULRUNNER_BUNDLE;
 	
@@ -88,7 +90,8 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 				"cocoa.macosx.x86",     //$NON-NLS-1$
 				"gtk.linux.x86",    //$NON-NLS-1$
 				"gtk.linux.x86_64", //$NON-NLS-1$
-				"win32.win32.x86"); //$NON-NLS-1$
+				"win32.win32.x86", //$NON-NLS-1$
+				"win32.win32.x86_64"); //$NON-NLS-1$
 	}
 	public static final String CURRENT_PLATFORM_ID = Platform.getWS() + '.'
 			+ Platform.getOS() + '.' + Platform.getOSArch();
@@ -199,7 +202,10 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 		String xulRunnerPath = System.getProperty(XULRUNNER_PATH);
 		if (xulRunnerPath == null) {
 
-			GREVersionRange[] greRanges = {new GREVersionRange(XULRUNNER_LOWER_VERSION, true, XULRUNNER_HIGHER_VERSION, true)};
+			GREVersionRange[] greRanges = {
+					new GREVersionRange(XULRUNNER_LOWER_VERSION, XULRUNNER_LOWER_VERSION_INCLUSIVE,
+							XULRUNNER_HIGHER_VERSION, XULRUNNER_HIGHER_VERSION_INCLUSIVE)
+				};
 			File xulRunnerFile  = null;
 
 			// JBIDE-1222 begin
