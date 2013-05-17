@@ -86,6 +86,7 @@ import org.jboss.tools.vpe.editor.util.DocTypeUtil;
 import org.jboss.tools.vpe.editor.util.FileUtil;
 import org.jboss.tools.vpe.editor.util.HTML;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
+import org.jboss.tools.vpe.xulrunner.XulRunnerBundleNotFoundException;
 import org.jboss.tools.vpe.xulrunner.XulRunnerException;
 import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
 import org.jboss.tools.vpe.xulrunner.editor.XulRunnerEditor;
@@ -681,8 +682,15 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 	protected void showXulRunnerError(Composite parent,
 			Throwable originalThrowable) {
 		Throwable throwable = wrapXulRunnerError(originalThrowable);
-		String errorMessage = MessageFormat.format(
-				VpeUIMessages.MOZILLA_LOADING_ERROR, throwable.getMessage());
+		String errorMessage;
+		// TODO: remove this check when XULRunner becomes not experimental
+		if (throwable instanceof XulRunnerBundleNotFoundException
+				&& "org.mozilla.xulrunner.win32.win32.x86_64".equals(((XulRunnerBundleNotFoundException) throwable).getBundleId())) {
+			errorMessage = VpeUIMessages.MOZILLA_EXPERIMENTAL_SUPPORT;
+		} else {
+			errorMessage = MessageFormat.format(
+					VpeUIMessages.MOZILLA_LOADING_ERROR, throwable.getMessage());
+		}
 		VpePlugin.getPluginLog().logError(errorMessage, throwable);
 
 		parent.setLayout(new GridLayout());

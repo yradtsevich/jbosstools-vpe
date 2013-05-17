@@ -17,6 +17,8 @@ import java.text.MessageFormat;
  *
  */
 public class XulRunnerBundleNotFoundException extends XulRunnerException {
+	
+	private String bundleId;
 
 	/**
 	 * @param message
@@ -25,6 +27,10 @@ public class XulRunnerBundleNotFoundException extends XulRunnerException {
 		super(MessageFormat.format(
 				VpeXulrunnerMessages.XulRunnerBrowser_bundleNotFound,
 				bundleId));
+		this.bundleId = bundleId;  
 	}
 
+	public String getBundleId() {
+		return bundleId;
+	}
 }
