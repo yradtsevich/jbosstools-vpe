@@ -69,10 +69,10 @@
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-	<plugin
+	<!--plugin
          id="org.jboss.tools.vpe.browsersim.eclipse.test"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.0.0"/-->
 
 </feature>

@@ -43,7 +43,7 @@
 				<module>org.jboss.tools.vpe.test</module>
 				<module>org.jboss.tools.vpe.xulrunner.test</module>
 				<module>org.jboss.tools.vpe.browsersim.browser.test</module>
-				<module>org.jboss.tools.vpe.browsersim.eclipse.test</module>
+				<!--module>org.jboss.tools.vpe.browsersim.eclipse.test</module-->
 		</modules>
 		</profile>
 
