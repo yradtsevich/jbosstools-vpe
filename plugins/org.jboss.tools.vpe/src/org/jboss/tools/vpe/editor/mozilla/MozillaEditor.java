@@ -198,7 +198,8 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 	private ToolBar verBar = null;
 	private MozillaResizeListener resizeListener;
 	private MozillaTooltipListener tooltipListener;
-
+	private IPropertyChangeListener selectionBarCloseListener;
+	
 	public void doSave(IProgressMonitor monitor) {
 	}
 
@@ -499,7 +500,8 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 					setValue(IVpePreferencesPage.SHOW_SELECTION_TAG_BAR, this.isChecked());
 			}
 		};
-		JspEditorPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+		
+		selectionBarCloseListener = new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				/*
@@ -512,7 +514,9 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 					}
 				}
 			}
-		});
+		};
+		JspEditorPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(selectionBarCloseListener);
+		
 		showSelectionBarAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
 				ICON_SELECTION_BAR));
 		showSelectionBarAction.setToolTipText(VpeUIMessages.SHOW_SELECTION_BAR);
@@ -795,6 +799,8 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 	}
 
 	public void dispose() {
+		JspEditorPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(selectionBarCloseListener);
+		
 		if (vpeToolBarManager != null) {
 			vpeToolBarManager.dispose();
 			vpeToolBarManager = null;
