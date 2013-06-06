@@ -16,15 +16,10 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.swt.events.HelpListener;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.menus.IMenuService;
@@ -86,6 +81,9 @@ public class VpeMenuCreator {
 	 * @see #addParentTagMenuItem(Element)
 	 */
 	private void createMenu(boolean topLevelMenu) {
+		addCutCopyPasteActions(topLevelMenu);
+		addSeparator();
+		
 		addIfEnabled(new EditAttributesAction(node));
 		menuManager.add(new SetupTemplateContributionItem());
 
@@ -139,9 +137,6 @@ public class VpeMenuCreator {
 
 		addSeparator();
 		addVpePreferences();
-
-		addSeparator();
-		addCutCopyPasteActions(topLevelMenu);
 	}
 
 	/**
