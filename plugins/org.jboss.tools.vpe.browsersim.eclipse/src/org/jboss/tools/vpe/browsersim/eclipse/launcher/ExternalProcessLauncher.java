@@ -195,7 +195,7 @@ public class ExternalProcessLauncher {
 	private static String getResource(Bundle bundle) throws IOException {
 		StringBuilder result = new StringBuilder();
 		String location = getBundleLocation(bundle);
-		File resources = new File(location + "/resources");
+		File resources = new File(location + "/../plugins");
 		if (resources.exists()) {
 			for(File resource : resources.listFiles()) {
 				result.append(PATH_SEPARATOR);
