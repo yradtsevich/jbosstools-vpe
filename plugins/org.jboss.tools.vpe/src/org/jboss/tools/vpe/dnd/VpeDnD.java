@@ -68,6 +68,7 @@ import org.mozilla.interfaces.nsISupportsCString;
 import org.mozilla.interfaces.nsISupportsString;
 import org.mozilla.interfaces.nsITransferable;
 import org.mozilla.xpcom.Mozilla;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -285,10 +286,14 @@ public class VpeDnD implements MozillaDndListener, MozillaSelectionListener, IVp
 				if (tagname.indexOf(TAG_TAGLIB) >= 0) {
 					tagname = TAG_TAGLIB;
 				}
-				Node dropContainer = ((Document) vpeController.getModel()
-						.getAdapter(Document.class)).createElement(tagname);
-	
-				return getDropResolverForNode(dropContainer);
+				
+				Document sourceDocument = (Document) vpeController.getModel().getAdapter(Document.class);
+				try {
+					Node dropContainer = sourceDocument.createElement(tagname);
+					return getDropResolverForNode(dropContainer);
+				} catch (DOMException e) {
+					return getSimpleDropResolver(false);
+				}
 			}
 		} else {
 			return getSimpleDropResolver(true);
