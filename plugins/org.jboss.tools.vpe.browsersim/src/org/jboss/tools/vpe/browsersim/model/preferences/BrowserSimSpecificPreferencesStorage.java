@@ -11,11 +11,12 @@
 package org.jboss.tools.vpe.browsersim.model.preferences;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -41,7 +42,7 @@ public class BrowserSimSpecificPreferencesStorage extends SpecificPreferencesSto
 	public static BrowserSimSpecificPreferencesStorage INSTANCE = new BrowserSimSpecificPreferencesStorage();
 	
 	@Override
-	protected SpecificPreferences load(File file) {
+	protected SpecificPreferences load(InputStream is) {
 		int configVersion = 0;
 		String selectedDeviceId = null;
 		int orientationAngle = 0;
@@ -49,11 +50,9 @@ public class BrowserSimSpecificPreferencesStorage extends SpecificPreferencesSto
 		boolean useSkins = true;
 		boolean enableLiveReload = false;
 
-		FileInputStream is = null;
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			is = new FileInputStream(file);
 			Document document = dBuilder.parse(is);
 
 			// optional, but recommended
@@ -101,6 +100,11 @@ public class BrowserSimSpecificPreferencesStorage extends SpecificPreferencesSto
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (FactoryConfigurationError e) {
+			e.printStackTrace();
+		} catch (RuntimeException t) {
+			//catched to avoid exceptions like NPE, NFE, etc
+			t.printStackTrace();
 		} finally {
 			try {
 				if (is != null)
@@ -162,7 +166,7 @@ public class BrowserSimSpecificPreferencesStorage extends SpecificPreferencesSto
 	}
 
 	@Override
-	protected SpecificPreferences getDefault() {
+	protected SpecificPreferences createBlankPreferences() {
 		return new BrowserSimSpecificPreferences(null, true, false, 0, null);
 	}
 
@@ -177,7 +181,7 @@ public class BrowserSimSpecificPreferencesStorage extends SpecificPreferencesSto
 	}
 
 	@Override
-	protected File getDefaultFile() {
-		return BrowserSimResourcesUtil.getResourceAsFile(DEFAULT_SPECIFIC_PREFERENCES_RESOURCE);
+	protected InputStream getDefaultPreferencesFileAsStream() {
+		return BrowserSimResourcesUtil.getResourceAsStream(DEFAULT_SPECIFIC_PREFERENCES_RESOURCE);
 	}
 }
