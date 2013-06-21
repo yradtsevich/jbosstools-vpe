@@ -12,7 +12,6 @@ package org.jboss.tools.vpe.editor.toolbar.format.handler;
 
 import java.util.Properties;
 
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
@@ -21,10 +20,6 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import org.jboss.tools.common.model.ui.views.palette.PaletteInsertHelper;
 import org.jboss.tools.jst.jsp.jspeditor.dnd.JSPPaletteInsertHelper;
 import org.jboss.tools.vpe.VpePlugin;
@@ -32,6 +27,9 @@ import org.jboss.tools.vpe.editor.template.textformating.FormatData;
 import org.jboss.tools.vpe.editor.template.textformating.TextFormatingData;
 import org.jboss.tools.vpe.editor.toolbar.format.FormatControllerManager;
 import org.jboss.tools.vpe.editor.toolbar.format.IFormatController;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author Igels
@@ -107,11 +105,11 @@ abstract public class FormatHandler implements IFormatHandler {
 		}
 
 		Properties p = new Properties();
-		p.setProperty(PaletteInsertHelper.PROPOPERTY_TAG_NAME, elementName);
-		p.setProperty(PaletteInsertHelper.PROPOPERTY_START_TEXT, "<" + elementName + ">"); //$NON-NLS-1$ //$NON-NLS-2$
-		p.setProperty(PaletteInsertHelper.PROPOPERTY_END_TEXT, "</" + elementName + ">"); //$NON-NLS-1$ //$NON-NLS-2$
+		p.setProperty(PaletteInsertHelper.PROPERTY_TAG_NAME, elementName);
+		p.setProperty(PaletteInsertHelper.PROPERTY_START_TEXT, "<" + elementName + ">"); //$NON-NLS-1$ //$NON-NLS-2$
+		p.setProperty(PaletteInsertHelper.PROPERTY_END_TEXT, "</" + elementName + ">"); //$NON-NLS-1$ //$NON-NLS-2$
 		if(format) {
-			p.setProperty(PaletteInsertHelper.PROPOPERTY_REFORMAT_BODY, "yes"); //$NON-NLS-1$
+			p.setProperty(PaletteInsertHelper.PROPERTY_REFORMAT_BODY, "yes"); //$NON-NLS-1$
 		}
 		p.setProperty(JSPPaletteInsertHelper.PROPOPERTY_TAGLIBRARY_URI, "http://www.w3.org/TR/REC-html40"); //$NON-NLS-1$
 		p.setProperty(JSPPaletteInsertHelper.PROPOPERTY_DEFAULT_PREFIX, ""); //$NON-NLS-1$

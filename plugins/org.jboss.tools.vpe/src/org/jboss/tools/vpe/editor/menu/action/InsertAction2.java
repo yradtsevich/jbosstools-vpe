@@ -199,10 +199,10 @@ public class InsertAction2 extends Action {
 				= sourceEditor.getSelectionProvider();
 
 		Properties p = new Properties();
-		p.setProperty(PaletteInsertHelper.PROPOPERTY_TAG_NAME, tagName);
-		p.setProperty(PaletteInsertHelper.PROPOPERTY_START_TEXT, startText);
-		p.setProperty(PaletteInsertHelper.PROPOPERTY_END_TEXT, endText);
-		p.setProperty(PaletteInsertHelper.PROPOPERTY_REFORMAT_BODY,
+		p.setProperty(PaletteInsertHelper.PROPERTY_TAG_NAME, tagName);
+		p.setProperty(PaletteInsertHelper.PROPERTY_START_TEXT, startText);
+		p.setProperty(PaletteInsertHelper.PROPERTY_END_TEXT, endText);
+		p.setProperty(PaletteInsertHelper.PROPERTY_REFORMAT_BODY,
 				item.getAttributeValue(TLDToPaletteHelper.REFORMAT));
 		p.setProperty(URIConstants.LIBRARY_URI, uri);
 		p.setProperty(URIConstants.LIBRARY_VERSION, libraryVersion);
@@ -214,7 +214,7 @@ public class InsertAction2 extends Action {
 		 * Added by Dzmitry Sakovich Fix for JBIDE-1626
 		 */
 		// if(((Node)region).getNodeType() == Node.ELEMENT_NODE)
-		p.put(PaletteInsertHelper.PROPOPERTY_SELECTION_PROVIDER,
+		p.put(PaletteInsertHelper.PROPERTY_SELECTION_PROVIDER,
 				selectionProvider);
 		JSPPaletteInsertHelper.getInstance().insertIntoEditor(sourceEditor.getTextViewer(), p);
 	}
