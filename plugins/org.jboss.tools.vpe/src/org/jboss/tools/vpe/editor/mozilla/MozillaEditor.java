@@ -1134,6 +1134,10 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 		}
 		if (showTextFormattingAction != null) {
 			showTextFormattingAction.setChecked(prefsShowTextFormatting);
+			if (vpeToolBarManager != null) {
+				// JBIDE-14756 Selection/reset of 'Show Text Formatting Bar' in VPE preferences does not Show/Hide 'Show Text Formatting Bar' in editor
+				vpeToolBarManager.setToolbarVisibility(prefsShowTextFormatting);
+			}
 		}
 		if (showBundleAsELAction != null) {
 			showBundleAsELAction.setChecked(prefsShowBundlesAsEL);
