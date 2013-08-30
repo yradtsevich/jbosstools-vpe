@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -87,11 +88,16 @@ public class VpeFunctionSrc extends VpeFunction {
     	if (input instanceof ILocationProvider) {
     		imgPath = inputPath.append(tagValue);
     	} else {
-    		IPath basePath = tagPath.isAbsolute() 
-    				? VpeStyleUtil.getRootPath(input) : inputPath;
-    				if (basePath != null) {
-    					imgPath = basePath.append(tagPath);
-    				}
+    		if (tagPath.isAbsolute()) {
+				for (IContainer container : VpeStyleUtil.getRootPath(input)) {
+					imgPath = container.getFullPath().append(tagPath);
+					if (imgPath != null && imgPath.toFile().exists()) {
+						break;
+					}
+				}
+			} else {
+				imgPath = inputPath.append(tagPath);
+			}
     	}
     	if (imgPath != null && imgPath.toFile().exists()) {
     		return new VpeValue(getPrefix() + imgPath.toString());

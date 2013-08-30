@@ -12,12 +12,12 @@ package org.jboss.tools.vpe.editor.template.expression;
 
 import java.io.File;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.editors.text.ILocationProvider;
 import org.w3c.dom.Node;
-
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.util.VpeStyleUtil;
 
@@ -64,12 +64,16 @@ public class VpeFunctionHref extends VpeFunctionSrc {
 	if (input instanceof ILocationProvider) {
 	    imgPath = inputPath.append(tagValue);
 	} else {
-	    IPath basePath = tagPath.isAbsolute()
-	    		? VpeStyleUtil.getRootPath(input)
-	    		: inputPath;
-	    if (basePath != null) {
-		imgPath = basePath.append(tagPath);
-	    }
+		if (tagPath.isAbsolute()) {
+			for (IContainer container : VpeStyleUtil.getRootPath(input)) {
+				imgPath = container.getFullPath().append(tagPath);
+				if (imgPath != null && imgPath.toFile().exists()) {
+					break;
+				}
+			}
+		} else {
+			imgPath = inputPath.append(tagPath);
+		}
 	}
 
 	if (imgPath != null && imgPath.toFile().exists()) {

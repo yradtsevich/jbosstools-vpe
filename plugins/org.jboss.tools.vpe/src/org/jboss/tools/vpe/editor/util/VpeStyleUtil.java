@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -38,6 +39,7 @@ import org.jboss.tools.common.model.XModel;
 import org.jboss.tools.common.model.project.IModelNature;
 import org.jboss.tools.common.model.util.EclipseResourceUtil;
 import org.jboss.tools.common.resref.core.ResourceReference;
+import org.jboss.tools.jst.web.WebUtils;
 import org.jboss.tools.jst.web.project.WebProject;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeIncludeInfo;
@@ -632,9 +634,15 @@ public class VpeStyleUtil {
 		if (input instanceof ILocationProvider) {
 			imgPath = inputPath.append(path);
 		} else {
-			IPath basePath = tagPath.isAbsolute() ? getRootPath(input) : inputPath;
-			if (basePath != null) {
-				imgPath = basePath.append(tagPath);
+			if (tagPath.isAbsolute()) {
+				for (IContainer container : getRootPath(input)) {
+					imgPath = container.getFullPath().append(tagPath);
+					if (imgPath != null && imgPath.toFile().exists()) {
+						break;
+					}
+				}
+			} else {
+				imgPath = inputPath.append(tagPath);
 			}
 		}
 
@@ -688,12 +696,11 @@ public class VpeStyleUtil {
 	 * 
 	 * @return the root path
 	 */
-	public static IPath getRootPath(IEditorInput input) {
-		IPath rootPath = null;
+	public static IContainer[] getRootPath(IEditorInput input) {
 		if (input instanceof IFileEditorInput) {
-			rootPath = getRootPath(((IFileEditorInput) input).getFile());
+			return  WebUtils.getWebRootFolders(((IFileEditorInput) input).getFile().getProject());
 		}
-		return rootPath;
+		return new IContainer[0];
 	}
 	
 	public static IPath getRootPath(IFile inputFile) {
