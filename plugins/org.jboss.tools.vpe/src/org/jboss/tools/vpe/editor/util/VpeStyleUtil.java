@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -38,6 +39,7 @@ import org.jboss.tools.common.model.XModel;
 import org.jboss.tools.common.model.project.IModelNature;
 import org.jboss.tools.common.model.util.EclipseResourceUtil;
 import org.jboss.tools.common.resref.core.ResourceReference;
+import org.jboss.tools.jst.web.WebUtils;
 import org.jboss.tools.jst.web.project.WebProject;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeIncludeInfo;
@@ -626,18 +628,8 @@ public class VpeStyleUtil {
 			return FILE_PROTOCOL + SLASH + SLASH + SLASH + locFile.getAbsolutePath().replace('\\', '/');
 		}
 
+		IPath imgPath = toFullPath(pageContext, tagPath);
 		IEditorInput input = pageContext.getEditPart().getEditorInput();
-		IPath inputPath = getInputParentPath(input);
-		IPath imgPath = null;
-		if (input instanceof ILocationProvider) {
-			imgPath = inputPath.append(path);
-		} else {
-			IPath basePath = tagPath.isAbsolute() ? getRootPath(input) : inputPath;
-			if (basePath != null) {
-				imgPath = basePath.append(tagPath);
-			}
-		}
-
 		if (imgPath != null && imgPath.toFile().exists()) {
 			return FILE_PROTOCOL + SLASH + SLASH + SLASH + imgPath.toString();
 		} else {
@@ -678,6 +670,34 @@ public class VpeStyleUtil {
 		} else {
 			return path.replace('\\', '/');
 		}
+	}
+
+	public static IPath toFullPath(VpePageContext pageContext, IPath path) {
+		IEditorInput input = pageContext.getEditPart().getEditorInput();
+		if (path.isAbsolute() && input instanceof IFileEditorInput) {
+			IFileEditorInput fileEditorInput = (IFileEditorInput) input;
+			IFile editorFile = fileEditorInput.getFile();
+			if (editorFile != null) {
+				IProject project = editorFile.getProject();
+				if (project != null) {
+					for (IContainer webRoot : WebUtils.getWebRootFolders(project)) {
+						IFile handle = webRoot.getFile(path);
+						if (handle.exists()) {
+							IPath fullPath = handle.getLocation();
+							if (fullPath != null && fullPath.toFile().exists()) {
+								return fullPath;
+							}
+						}
+					}
+				}
+			}
+		} else {
+			IPath inputPath = getInputParentPath(input);
+			if (inputPath != null) {
+				return inputPath.append(path);
+			}
+		}
+		return null;
 	}
 
 	/**
