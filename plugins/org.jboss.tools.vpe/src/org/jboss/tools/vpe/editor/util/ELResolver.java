@@ -1,11 +1,24 @@
-/**
- * 
- */
+/*******************************************************************************
+ * Copyright (c) 2007-2013 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributor:
+ *     Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.jboss.tools.vpe.editor.util;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.jboss.tools.common.resref.core.ResourceReference;
 import org.jboss.tools.jst.jsp.bundle.BundleMapUtil;
+import org.jboss.tools.jst.web.tld.TaglibData;
+import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
@@ -17,7 +30,6 @@ import org.w3c.dom.Node;
  *
  */
 public class ELResolver {
-
 	protected VpePageContext pageContext;
 	
 	public ELResolver(VpePageContext pageContext) {
@@ -79,19 +91,20 @@ public class ELResolver {
 	 * @return true, if is cloneable node
 	 */
 	public boolean isELNode(Node sourceNode) {
-		boolean rst = false;
 		if (isInCustomElementsAttributes(sourceNode)) {
-			rst = true;
+			return true;
 		} else if (isAvailableForNode(sourceNode)
 				|| BundleMapUtil.isInResourcesBundle(pageContext.getBundle(), sourceNode)) {
-			rst = true;
+			return true;
 		} else if (Jsf2ResourceUtil.isContainJSFContextPath(sourceNode)) {
-			rst = true;
+			return true;
 		} else if (Jsf2ResourceUtil.isContainJSF2ResourceAttributes(sourceNode)) {
 			// added by Maksim Areshkau, see JBIDE-4812
-			rst = true;
+			return true;
+		} else if (JstlCoreUrlUtil.isContainigJstlCoreUrlInAttributes(pageContext, sourceNode)) {
+			return true;
 		}
-		return rst;
+		return false;
 	}
 
 	/**
@@ -188,8 +201,18 @@ public class ELResolver {
 		return res;
 	}
 
+	/**
+	 * @deprecated use {@link #replaceElAndResources(String, Node)} instead 
+	 */
 	public String replaceElAndResources(String value) {
+		return replaceElAndResources(value, null);
+	}
+	
+	public String replaceElAndResources(String value, Node contextNode) {
 		String rst = value;
+		
+		rst = JstlCoreUrlUtil.processJstlCoreUrlIfNeeded(pageContext, contextNode, value);
+		
 		rst = ResourceUtil.getBundleValue(pageContext, rst);
 		rst = replaceEl(rst);
 		

@@ -48,8 +48,14 @@ public class ElService {
 		return getElResolver().getResourceReferences();
 	}
 
+	/**
+	 * @deprecated use {@link #replaceElAndResources(String, Node)} instead
+	 */
 	public String replaceElAndResources(String value) {
-		return getElResolver().replaceElAndResources(value);
+		return replaceElAndResources(value, null);
+	}
+	public String replaceElAndResources(String value, Node currentNode) {
+		return getElResolver().replaceElAndResources(value, currentNode);
 	}
 	
 	private ELResolver getElResolver() {
