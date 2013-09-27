@@ -18,9 +18,6 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
-import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.OpenWindowListener;
-import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.graphics.Image;
@@ -31,7 +28,12 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
+import org.jboss.tools.vpe.browsersim.browser.ExtendedOpenWindowListener;
+import org.jboss.tools.vpe.browsersim.browser.ExtendedWindowEvent;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
+import org.jboss.tools.vpe.browsersim.browser.WebViewBrowser;
+import org.jboss.tools.vpe.browsersim.devtools.DevToolsDebuggerServer;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ExceptionNotifier;
@@ -52,8 +54,10 @@ public class CordovaSimRunner {
 	public static final String PLUGIN_ID = "org.jboss.tools.vpe.cordovasim"; //$NON-NLS-1$
 	
 	private static CustomBrowserSim browserSim;
+
 	private static final String[] CORDOVASIM_ICONS = {"icons/cordovasim_36px.png", "icons/cordovasim_48px.png", "icons/cordovasim_72px.png", "icons/cordovasim_96px.png"};
 
+	static boolean debuggerStarted = false;
 	/**
 	 * @param args
 	 * @throws Exception
@@ -80,7 +84,11 @@ public class CordovaSimRunner {
 			final Shell shell = new Shell(display);
 			setShellAttributes(shell);
 			shell.setLayout(new FillLayout());
-			final Browser browser = new Browser(shell, SWT.WEBKIT);
+			final IBrowser browser = new WebViewBrowser(shell);
+//			{
+//				DevToolsDebuggerServer.startDebugServer(((WebViewBrowser)browser).getDebugger());
+//				debuggerStarted = true;
+//			}
 			browser.setUrl("http://localhost:" + port + "/" + cordovaSimArgs.getStartPage() + "?enableripple=true");
 			
 			shell.addListener(SWT.Close, new Listener() {
@@ -105,11 +113,10 @@ public class CordovaSimRunner {
 				sp.setCordovaBrowserLocation(shell.getLocation());
 			}
 			
-			browser.addOpenWindowListener(new OpenWindowListener() {
-				private Browser oldBrowser;
-
+			browser.addOpenWindowListener(new ExtendedOpenWindowListener() {
+				private IBrowser oldBrowser;
 				@Override
-				public void open(WindowEvent event) {
+				public void open(ExtendedWindowEvent event) {
 					if (browserSim == null || browserSim.getBrowser().isDisposed()
 							|| browserSim.getBrowser().getShell().isDisposed()) {
 						createBrowserSim(sp, browser);
@@ -121,6 +128,15 @@ public class CordovaSimRunner {
 					}
 					event.browser = browserSim.getBrowser();
 					oldBrowser = browserSim.getBrowser();
+					{
+						try {
+							DevToolsDebuggerServer.startDebugServer(((WebViewBrowser)oldBrowser).getDebugger());
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						debuggerStarted = true;
+					}
 				}
 			});
 			shell.addControlListener(new ControlAdapter() {
@@ -160,6 +176,9 @@ public class CordovaSimRunner {
 			if (display != null) {
 				display.dispose();
 			}
+			if (debuggerStarted) {
+				DevToolsDebuggerServer.stopDebugServer();
+			}
 		}
 	}
 	
@@ -171,7 +190,7 @@ public class CordovaSimRunner {
 		display.dispose();
 	}
 
-	private static void createBrowserSim(final SpecificPreferences sp, final Browser browser) {
+	private static void createBrowserSim(final SpecificPreferences sp, final IBrowser browser) {
 		Shell parentShell = browser.getShell();
 		if (parentShell != null) {
 			browserSim = new CustomBrowserSim("about:blank", parentShell);

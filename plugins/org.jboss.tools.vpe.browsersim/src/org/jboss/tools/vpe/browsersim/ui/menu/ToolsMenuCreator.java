@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.ProgressEvent;
@@ -33,6 +32,8 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
+import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.model.preferences.BrowserSimSpecificPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
@@ -140,7 +141,7 @@ public class ToolsMenuCreator {
 		});
 	}
 	
-	private static void injectUrl(Browser browser, String scriptUrl, String ID) {
+	private static void injectUrl(IBrowser browser, String scriptUrl, String ID) {
 		browser.execute("var head = document.head;"
 				+		"var script = document.createElement('script');"
 				+		"head.appendChild(script);"
@@ -153,14 +154,14 @@ public class ToolsMenuCreator {
 		shell.setText("Weinre Inspector");
 		
 		Composite browserComposite = createBrowserComposite(shell, clientUrl);
-		final Browser weinreBrowser = createWeinreBrowser(browserComposite);
+		final IBrowser weinreBrowser = createWeinreBrowser(browserComposite);
 		weinreBrowser.setUrl(clientUrl);
 		
 		final LocationAdapter locationAdapter = new LocationAdapter() {
 			@Override
 			public void changed(LocationEvent event) {
 				if (event.top) {
-					Browser browser = (Browser) event.widget;
+					IBrowser browser = (IBrowser) event.widget;
 					browser.execute(
 						  "window.addEventListener('load', function() {"
 						+	"var head = document.head;"
@@ -232,8 +233,8 @@ public class ToolsMenuCreator {
 		return browserComposite;
 	}
 	
-	private static Browser createWeinreBrowser(Composite browserComposite) {
-		final Browser browser = new Browser(browserComposite, SWT.WEBKIT);
+	private static IBrowser createWeinreBrowser(Composite browserComposite) {
+		final IBrowser browser = new WebKitBrowserFactory().createBrowser(browserComposite, SWT.WEBKIT);
 		GridData browserData = new GridData();
 		browserData.horizontalAlignment = GridData.FILL;
 		browserData.verticalAlignment = GridData.FILL;

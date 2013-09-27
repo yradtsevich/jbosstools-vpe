@@ -4,5 +4,10 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.jboss.tools.vpe.cordovasim.ripple"/>
+	<classpathentry kind="lib" path="D:/Progs/programming/jdk1.7.0/jre/lib/jfxrt.jar" sourcepath="d:/Downloads/Software/Programming/Java/javafx-2.2-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="http://docs.oracle.com/javafx/2/api/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
 import org.jboss.tools.vpe.browsersim.browser.IBrowserSimBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.Device;
@@ -45,7 +46,7 @@ public class NativeSkin implements BrowserSimSkin {
 	private Label statusLabel;
 	private Text locationText;
 	private Shell shell;
-	private BrowserSimBrowser browser;
+	private IBrowser browser;
 	private Menu menuBar;
 	private ControlHandler controlHandler;
 	private ToolItem itemBack;
@@ -281,7 +282,7 @@ public class NativeSkin implements BrowserSimSkin {
 	}
 	
 	@Override
-	public BrowserSimBrowser getBrowser() {
+	public IBrowser getBrowser() {
 		return browser;
 	}
 	

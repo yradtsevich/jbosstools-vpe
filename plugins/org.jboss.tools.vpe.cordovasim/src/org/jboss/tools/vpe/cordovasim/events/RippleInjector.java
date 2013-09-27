@@ -10,14 +10,14 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.cordovasim.events;
 
-import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 
 public class RippleInjector extends LocationAdapter {
 	@Override
 	public void changed(LocationEvent event) {
-		Browser browser = (Browser) event.widget;
+		IBrowser browser = (IBrowser) event.widget;
 		if (event.top) {
 			browser.execute(
 					/* We have to remember userAgent of the BrowserSim, cause window.navigator object would be overridden by ripple

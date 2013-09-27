@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
 import org.jboss.tools.vpe.browsersim.browser.IBrowserSimBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
@@ -45,7 +46,7 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 	private IBrowserSimBrowserFactory browserFactory;
 	private Display display;
 	private Shell shell;
-	private BrowserSimBrowser browser;
+	private IBrowser browser;
 	private boolean vertical;
 	
 	private int[] visibleRegionHorizontal;
@@ -372,7 +373,7 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 	}
 	
 	@Override
-	public BrowserSimBrowser getBrowser() {
+	public IBrowser getBrowser() {
 		return browser;
 	}
 

@@ -57,7 +57,7 @@ public class ServerCreator {
 		
 		ServletContextHandler fileUploadContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		ServletHolder uploadFileServletHolder = new ServletHolder(new UploadFileServlet());
-		uploadFileServletHolder.getRegistration().setMultipartConfig(new MultipartConfigElement(null, 1048576, 1048576, 262144));
+		uploadFileServletHolder.getRegistration().setMultipartConfig(new MultipartConfigElement(null, 10485760, 10485760, 2621440));
 		fileUploadContextHandler.addServlet(uploadFileServletHolder, "/ripple/fileUpload");
 
 		ServletHolder hostFileServletHolder = new ServletHolder(new HostFileServlet());
