@@ -18,7 +18,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
-import org.eclipse.swt.browser.Browser;
+import org.jboss.tools.vpe.browsersim.browser.Browser;
 import org.eclipse.swt.browser.OpenWindowListener;
 import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.events.ControlAdapter;

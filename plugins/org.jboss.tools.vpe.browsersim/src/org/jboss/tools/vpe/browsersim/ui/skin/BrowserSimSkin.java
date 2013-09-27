@@ -14,7 +14,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.IBrowserSimBrowserFactory;
 import org.jboss.tools.vpe.browsersim.ui.ControlHandler;
 
@@ -24,7 +24,7 @@ import org.jboss.tools.vpe.browsersim.ui.ControlHandler;
 public interface BrowserSimSkin {
 	void setBrowserFactory(IBrowserSimBrowserFactory browserFactory);
 	void createControls(Display display, Point location, Shell parentShell);
-	BrowserSimBrowser getBrowser();
+	IBrowser getBrowser();
 	Shell getShell();
 	Menu getMenuBar();
 	Point getMinimalScreenSize();

@@ -11,6 +11,7 @@
 package org.jboss.tools.vpe.browsersim.browser;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -47,4 +48,26 @@ public abstract class AbstractWebKitBrowser extends BrowserSimBrowser {
 	}
 	
 	protected abstract void setCustomUserAgent(String userAgent);
+	
+	@Override
+	public IDisposable registerBrowserFunction(String name, final IBrowserFunction iBrowserFunction) {
+		final BrowserFunction function = new BrowserFunction(this, name) {
+			@Override
+			public Object function(Object[] arguments) {
+				return iBrowserFunction.function(arguments);
+			}
+		}; 
+		
+		return new IDisposable() {
+			@Override
+			public boolean isDisposed() {
+				return function.isDisposed();
+			}
+			
+			@Override
+			public void dispose() {
+				function.dispose();
+			}
+		};
+	}
 }

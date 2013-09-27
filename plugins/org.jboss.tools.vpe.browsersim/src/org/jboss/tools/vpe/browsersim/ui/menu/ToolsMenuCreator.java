@@ -14,9 +14,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.LocationAdapter;
-import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.SWTError;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.events.DisposeEvent;
@@ -55,7 +54,7 @@ public class ToolsMenuCreator {
 		debug.setText(Messages.BrowserSim_DEBUG);
 		Menu subMenu = new Menu(debug);
 		addFireBugLiteItem(subMenu, skin);
-		addWeinreItem(subMenu, skin, weinreScriptUrl, weinreClientUrl);
+//		addWeinreItem(subMenu, skin, weinreScriptUrl, weinreClientUrl);
 		debug.setMenu(subMenu);
 	}
 	
@@ -64,32 +63,32 @@ public class ToolsMenuCreator {
 		fireBugLite.setText(Messages.BrowserSim_FIREBUG_LITE);
 		fireBugLite.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				FireBugLiteLoader.startFireBugOpening(skin.getBrowser());
+//				FireBugLiteLoader.startFireBugOpening(skin.getBrowser());
 			}
 		});
 	}
 	
-	private static void addWeinreItem(Menu menu, final BrowserSimSkin skin, final String weinreScriptUrl,
-			final String weinreClientUrl) {
-		
-		MenuItem weinre = new MenuItem(menu, SWT.PUSH);
-		weinre.setText(Messages.BrowserSim_WEINRE);
-		weinre.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				//check if weinre url injected by user only in first page
-				String clientUrl = (String) skin.getBrowser().evaluate("if(window.WeinreServerURL && window.WeinreServerId) {return window.WeinreServerURL + 'client/'} else {return null}");
-				String id = (String) skin.getBrowser().evaluate("if(window.WeinreServerURL && window.WeinreServerId) {return window.WeinreServerId} else {return null}");
-				
-				if (clientUrl == null || id == null) {
-					id = UUID.randomUUID().toString();
-					clientUrl = weinreClientUrl;
-					injectUrl(skin.getBrowser(), weinreScriptUrl, id);
-				}
-
-				createWeinreShell(skin, clientUrl + "#" + id, weinreScriptUrl, id).open();
-			}
-		});
-	}
+//	private static void addWeinreItem(Menu menu, final BrowserSimSkin skin, final String weinreScriptUrl,
+//			final String weinreClientUrl) {
+//		
+//		MenuItem weinre = new MenuItem(menu, SWT.PUSH);
+//		weinre.setText(Messages.BrowserSim_WEINRE);
+//		weinre.addSelectionListener(new SelectionAdapter() {
+//			public void widgetSelected(SelectionEvent e) {
+//				//check if weinre url injected by user only in first page
+//				String clientUrl = (String) skin.getBrowser().evaluate("if(window.WeinreServerURL && window.WeinreServerId) {return window.WeinreServerURL + 'client/'} else {return null}");
+//				String id = (String) skin.getBrowser().evaluate("if(window.WeinreServerURL && window.WeinreServerId) {return window.WeinreServerId} else {return null}");
+//				
+//				if (clientUrl == null || id == null) {
+//					id = UUID.randomUUID().toString();
+//					clientUrl = weinreClientUrl;
+//					injectUrl(skin.getBrowser(), weinreScriptUrl, id);
+//				}
+//
+//				createWeinreShell(skin, clientUrl + "#" + id, weinreScriptUrl, id).open();
+//			}
+//		});
+//	}
 	
 	public static void addScreenshotMenuItem(Menu menu, final BrowserSimSkin skin, final CommonPreferences commonPreferences) {
 		MenuItem screenshot = new MenuItem(menu, SWT.CASCADE);
@@ -140,56 +139,56 @@ public class ToolsMenuCreator {
 		});
 	}
 	
-	private static void injectUrl(Browser browser, String scriptUrl, String ID) {
+	private static void injectUrl(IBrowser browser, String scriptUrl, String ID) {
 		browser.execute("var head = document.head;"
 				+		"var script = document.createElement('script');"
 				+		"head.appendChild(script);"
 				+		"script.src='" + scriptUrl + "#" + ID + "'");
 	}
 	
-	private static Shell createWeinreShell(final BrowserSimSkin skin, String clientUrl, final String scriptUrl, final String id) {
-		final Shell shell = new Shell(BrowserSimUtil.getParentShell(skin), SWT.SHELL_TRIM);
-		shell.setLayout(new FillLayout(SWT.VERTICAL | SWT.HORIZONTAL));
-		shell.setText("Weinre Inspector");
-		
-		Composite browserComposite = createBrowserComposite(shell, clientUrl);
-		final Browser weinreBrowser = createWeinreBrowser(browserComposite);
-		weinreBrowser.setUrl(clientUrl);
-		
-		final LocationAdapter locationAdapter = new LocationAdapter() {
-			@Override
-			public void changed(LocationEvent event) {
-				if (event.top) {
-					Browser browser = (Browser) event.widget;
-					browser.execute(
-						  "window.addEventListener('load', function() {"
-						+	"var head = document.head;"
-						+ 	"var script = document.createElement('script');"
-						+ 	"head.appendChild(script);"
-						+ 	"script.src='" + scriptUrl + "#" + id + "';"
-						+ "});");
-				}
-			}
-		};
-		skin.getBrowser().addLocationListener(locationAdapter);
-		
-		weinreBrowser.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				skin.getBrowser().removeLocationListener(locationAdapter);
-			}
-		});
-		skin.getShell().addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent arg0) {
-				if (!weinreBrowser.isDisposed() && !weinreBrowser.getShell().isDisposed()) {
-					weinreBrowser.getShell().dispose();
-				}
-			}
-		});
-
-		return shell;
-	}
+//	private static Shell createWeinreShell(final BrowserSimSkin skin, String clientUrl, final String scriptUrl, final String id) {
+//		final Shell shell = new Shell(BrowserSimUtil.getParentShell(skin), SWT.SHELL_TRIM);
+//		shell.setLayout(new FillLayout(SWT.VERTICAL | SWT.HORIZONTAL));
+//		shell.setText("Weinre Inspector");
+//		
+//		Composite browserComposite = createBrowserComposite(shell, clientUrl);
+//		final Browser weinreBrowser = createWeinreBrowser(browserComposite);
+//		weinreBrowser.setUrl(clientUrl);
+//		
+//		final LocationAdapter locationAdapter = new LocationAdapter() {
+//			@Override
+//			public void changed(LocationEvent event) {
+//				if (event.top) {
+//					Browser browser = (Browser) event.widget;
+//					browser.execute(
+//						  "window.addEventListener('load', function() {"
+//						+	"var head = document.head;"
+//						+ 	"var script = document.createElement('script');"
+//						+ 	"head.appendChild(script);"
+//						+ 	"script.src='" + scriptUrl + "#" + id + "';"
+//						+ "});");
+//				}
+//			}
+//		};
+//		skin.getBrowser().addLocationListener(locationAdapter);
+//		
+//		weinreBrowser.addDisposeListener(new DisposeListener() {
+//			@Override
+//			public void widgetDisposed(DisposeEvent e) {
+//				skin.getBrowser().removeLocationListener(locationAdapter);
+//			}
+//		});
+//		skin.getShell().addDisposeListener(new DisposeListener() {
+//			@Override
+//			public void widgetDisposed(DisposeEvent arg0) {
+//				if (!weinreBrowser.isDisposed() && !weinreBrowser.getShell().isDisposed()) {
+//					weinreBrowser.getShell().dispose();
+//				}
+//			}
+//		});
+//
+//		return shell;
+//	}
 	
 	private static Composite createBrowserComposite(final Shell weinreShell, String clientUrl) {
 		Menu menuBar = Display.getDefault().getMenuBar();
@@ -232,41 +231,41 @@ public class ToolsMenuCreator {
 		return browserComposite;
 	}
 	
-	private static Browser createWeinreBrowser(Composite browserComposite) {
-		final Browser browser = new Browser(browserComposite, SWT.WEBKIT);
-		GridData browserData = new GridData();
-		browserData.horizontalAlignment = GridData.FILL;
-		browserData.verticalAlignment = GridData.FILL;
-		browserData.horizontalSpan = 1;
-		browserData.grabExcessHorizontalSpace = true;
-		browserData.grabExcessVerticalSpace = true;
-		browser.setLayoutData(browserData);
-
-		final ProgressBar progressBar = new ProgressBar(browserComposite, SWT.NONE);
-
-		GridData data = new GridData();
-		data.horizontalAlignment = GridData.END;
-		progressBar.setLayoutData(data);
-
-		browser.addProgressListener(new ProgressListener() {
-			public void changed(ProgressEvent event) {
-				int ratio;
-				if (event.current == event.total || event.total == 0) {
-					progressBar.setSelection(0);
-					progressBar.setEnabled(false);
-				} else {
-					ratio = event.current * 100 / event.total;
-					progressBar.setEnabled(true);
-					progressBar.setSelection(ratio);
-				}
-			}
-
-			public void completed(ProgressEvent event) {
-				progressBar.setSelection(0);
-				progressBar.setEnabled(false);
-			}
-		});
-		
-		return browser;
-	}
+//	private static Browser createWeinreBrowser(Composite browserComposite) {
+//		final Browser browser = new Browser(browserComposite, SWT.WEBKIT);
+//		GridData browserData = new GridData();
+//		browserData.horizontalAlignment = GridData.FILL;
+//		browserData.verticalAlignment = GridData.FILL;
+//		browserData.horizontalSpan = 1;
+//		browserData.grabExcessHorizontalSpace = true;
+//		browserData.grabExcessVerticalSpace = true;
+//		browser.setLayoutData(browserData);
+//
+//		final ProgressBar progressBar = new ProgressBar(browserComposite, SWT.NONE);
+//
+//		GridData data = new GridData();
+//		data.horizontalAlignment = GridData.END;
+//		progressBar.setLayoutData(data);
+//
+//		browser.addProgressListener(new ProgressListener() {
+//			public void changed(ProgressEvent event) {
+//				int ratio;
+//				if (event.current == event.total || event.total == 0) {
+//					progressBar.setSelection(0);
+//					progressBar.setEnabled(false);
+//				} else {
+//					ratio = event.current * 100 / event.total;
+//					progressBar.setEnabled(true);
+//					progressBar.setSelection(ratio);
+//				}
+//			}
+//
+//			public void completed(ProgressEvent event) {
+//				progressBar.setSelection(0);
+//				progressBar.setEnabled(false);
+//			}
+//		});
+//		
+//		return browser;
+//	}
 }

@@ -29,50 +29,51 @@ public class WebKitBrowserFactory implements IBrowserSimBrowserFactory {
 	public static final String NO_SAFARI = "Safari must be installed to use a SWT.WEBKIT-style Browser"; 
 	
 	@Override
-	public AbstractWebKitBrowser createBrowser(Composite parent, int style) {
-		if (PlatformUtil.CURRENT_PLATFORM.equals("gtk.linux.x86")) {
-			return new WebKitBrowser_gtk_linux_x86(parent, style);
-		} else if (PlatformUtil.CURRENT_PLATFORM.equals("gtk.linux.x86_64")) {
-			return new WebKitBrowser_gtk_linux_x86_64(parent, style);
-		} else if (PlatformUtil.CURRENT_PLATFORM.startsWith("cocoa.macosx")) {
-			return new WebKitBrowser_webkit_cocoa_macos(parent, style);
-		} else if (PlatformUtil.CURRENT_PLATFORM.equals("win32.win32.x86")) {
-			//due to last changes Safari is needed to run BrowerSim (against QuickTime)
-			//to avoid JVM crash we need to check Safari existance before creating a browser.(JBIDE-13044).
-			//If an exception is thrown during org.eclipse.swt.browser.WebKit.readInstallDir() invocation,
-			//this means that SWT internal API is changed and we just log it to the console.
-			try {
-				Method method = Class.forName("org.eclipse.swt.browser.WebKit").getDeclaredMethod("readInstallDir", String.class);
-				method.setAccessible(true);
-				String AASDirectory = (String) method.invoke(null, "SOFTWARE\\Apple Computer, Inc.\\Safari");//$NON-NLS-1$
-				
-				if (AASDirectory != null) {
-					AASDirectory += "\\Apple Application Support"; //$NON-NLS-1$
-					if (!new File(AASDirectory).exists()) {
-						AASDirectory = null;
-					}
-				}
-				
-				if (AASDirectory == null) {
-					throw new SWTError(NO_SAFARI);
-				}
-			} catch(IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (SecurityException e) {
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			} 
-			
-			return new WebKitBrowser_win32_win32_x86(parent, style);
-		}
-
-		throw new SWTError("Unsupported Platform");
+	public IBrowser createBrowser(Composite parent, int style) {
+//		if (PlatformUtil.CURRENT_PLATFORM.equals("gtk.linux.x86")) {
+//			return new WebKitBrowser_gtk_linux_x86(parent, style);
+//		} else if (PlatformUtil.CURRENT_PLATFORM.equals("gtk.linux.x86_64")) {
+//			return new WebKitBrowser_gtk_linux_x86_64(parent, style);
+//		} else if (PlatformUtil.CURRENT_PLATFORM.startsWith("cocoa.macosx")) {
+//			return new WebKitBrowser_webkit_cocoa_macos(parent, style);
+//		} else if (PlatformUtil.CURRENT_PLATFORM.equals("win32.win32.x86")) {
+//			//due to last changes Safari is needed to run BrowerSim (against QuickTime)
+//			//to avoid JVM crash we need to check Safari existance before creating a browser.(JBIDE-13044).
+//			//If an exception is thrown during org.eclipse.swt.browser.WebKit.readInstallDir() invocation,
+//			//this means that SWT internal API is changed and we just log it to the console.
+//			try {
+//				Method method = Class.forName("org.eclipse.swt.browser.WebKit").getDeclaredMethod("readInstallDir", String.class);
+//				method.setAccessible(true);
+//				String AASDirectory = (String) method.invoke(null, "SOFTWARE\\Apple Computer, Inc.\\Safari");//$NON-NLS-1$
+//				
+//				if (AASDirectory != null) {
+//					AASDirectory += "\\Apple Application Support"; //$NON-NLS-1$
+//					if (!new File(AASDirectory).exists()) {
+//						AASDirectory = null;
+//					}
+//				}
+//				
+//				if (AASDirectory == null) {
+//					throw new SWTError(NO_SAFARI);
+//				}
+//			} catch(IllegalAccessException e) {
+//				e.printStackTrace();
+//			} catch (SecurityException e) {
+//				e.printStackTrace();
+//			} catch (NoSuchMethodException e) {
+//				e.printStackTrace();
+//			} catch (ClassNotFoundException e) {
+//				e.printStackTrace();
+//			} catch (IllegalArgumentException e) {
+//				e.printStackTrace();
+//			} catch (InvocationTargetException e) {
+//				e.printStackTrace();
+//			} 
+//			
+//			return new WebKitBrowser_win32_win32_x86(parent, style);
+//		}
+//
+//		throw new SWTError("Unsupported Platform");
+		return new WebViewBrowser(parent);
 	}
 }

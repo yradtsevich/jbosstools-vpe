@@ -13,17 +13,23 @@ package org.jboss.tools.vpe.browsersim;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javafx.util.Callback;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
+import org.jboss.tools.vpe.browsersim.browser.WebViewBrowser;
+import org.jboss.tools.vpe.browsersim.devtools.DevToolsDebuggerServer;
 import org.jboss.tools.vpe.browsersim.ui.BrowserSim;
 import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ExceptionNotifier;
 import org.jboss.tools.vpe.browsersim.ui.Messages;
 import org.jboss.tools.vpe.browsersim.util.BrowserSimImageList;
+
+import com.sun.javafx.scene.web.Debugger;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
@@ -36,8 +42,9 @@ public class BrowserSimRunner {
 	public static final String NOT_STANDALONE = "-not-standalone"; //$NON-NLS-1$
 	public static final String ABOUT_BLANK = "about:blank"; //"http://www.w3schools.com/js/tryit_view.asp?filename=try_nav_useragent"; //$NON-NLS-1$
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		Display display = null;
+		boolean debuggerStarted = false;
 		try {
 			if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
 				CocoaUIEnhancer.initializeMacOSMenuBar(Messages.BrowserSim_BROWSER_SIM);
@@ -66,6 +73,10 @@ public class BrowserSimRunner {
 			}
 			BrowserSim browserSim = new BrowserSim(url, parent);
 			browserSim.open();
+			if (browserSim.getBrowser() instanceof WebViewBrowser) {
+				DevToolsDebuggerServer.startDebugServer(((WebViewBrowser)browserSim.getBrowser()).getDebugger());
+				debuggerStarted = true;
+			}
 	
 			display = Display.getDefault();
 			while (!display.isDisposed() && BrowserSim.getInstances().size() > 0) {
@@ -73,6 +84,7 @@ public class BrowserSimRunner {
 					display.sleep();
 				}
 			}
+			
 		} catch (SWTError e) {
 			ExceptionNotifier.showBrowserSimLoadError(new Shell(Display.getDefault()), e, "BrowserSim");
 		} catch (Throwable t) {
@@ -80,6 +92,9 @@ public class BrowserSimRunner {
 		} finally {
 			if (display != null) {
 				display.dispose();
+			}
+			if (debuggerStarted) {
+				DevToolsDebuggerServer.stopDebugServer();
 			}
 		}
 	}

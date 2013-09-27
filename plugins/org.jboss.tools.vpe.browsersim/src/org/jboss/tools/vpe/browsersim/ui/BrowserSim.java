@@ -17,7 +17,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.BrowserSimLogger;
 import org.jboss.tools.vpe.browsersim.BrowserSimRunner;
 import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
+import org.jboss.tools.vpe.browsersim.browser.IBrowserFunction;
+import org.jboss.tools.vpe.browsersim.browser.IDisposable;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.Device;
@@ -185,7 +187,7 @@ public class BrowserSim {
 			}
 		});
 
-		final BrowserSimBrowser browser = getBrowser();
+		final IBrowser browser = getBrowser();
 		controlHandler = createControlHandler(browser, homeUrl, specificPreferences);
 		final BrowserSimMenuCreator menuCreator = createMenuCreator(skin, commonPreferences, specificPreferences, controlHandler, homeUrl);
 		
@@ -246,7 +248,6 @@ public class BrowserSim {
 		browser.addLocationListener(new LocationListener() {
 			public void changed(LocationEvent event) {
 				if (event.top) {
-					BrowserSimBrowser browser = (BrowserSimBrowser) event.widget;
 					skin.locationChanged(event.location, browser.isBackEnabled(), browser.isForwardEnabled());
 				}
 			}
@@ -267,103 +268,103 @@ public class BrowserSim {
 			browser.addLocationListener(new LocationAdapter() {
 				@Override
 				public void changed(LocationEvent event) {
-					Browser browser = (Browser) event.widget;
+					IBrowser browser = (IBrowser) event.widget;
 					setCustomScrollbarStyles(browser);
 				}
 
 				@SuppressWarnings("nls")
-				private void setCustomScrollbarStyles(Browser browser) {
+				private void setCustomScrollbarStyles(IBrowser browser) {
 				
-					browser.execute(
-						"if (window._browserSim_customScrollBarStylesSetter === undefined) {"
-							+"window._browserSim_customScrollBarStylesSetter = function () {"
-							+	"document.removeEventListener('DOMSubtreeModified', window._browserSim_customScrollBarStylesSetter, false);"
-							+	"var head = document.head;"
-							+	"var style = document.createElement('style');"
-							+	"style.type = 'text/css';"
-							+	"style.id='browserSimStyles';"
-							+	"head.appendChild(style);"
-							+	"style.innerText='"
-							// The following two rules fix a problem with showing scrollbars in Google Mail and similar,
-							// but autohiding of navigation bar stops to work with it. That is why they are commented.
-							//+	"html {"
-							//+		"overflow: hidden;"
-							//+	"}"
-							//+	"body {"
-							//+		"position: absolute;"
-							//+		"top: 0px;"
-							//+		"left: 0px;"
-							//+		"bottom: 0px;"
-							//+		"right: 0px;"
-							//+		"margin: 0px;"
-							//+		"overflow-y: auto;"
-							//+		"overflow-x: auto;"
-							//+	"}"
-							+		"::-webkit-scrollbar {"
-							+			"width: 5px;"
-							+			"height: 5px;"
-							+		"}"
-							+		"::-webkit-scrollbar-thumb {"
-							+			"background: rgba(0,0,0,0.4); "
-							+		"}"
-							+		"::-webkit-scrollbar-corner, ::-webkit-scrollbar-thumb:window-inactive {"
-							+			"background: rgba(0,0,0,0.0);"
-							+		"};"
-							+	"';"
-							+"};"
-							+ "document.addEventListener('DOMSubtreeModified', window._browserSim_customScrollBarStylesSetter, false);"
-						+ "}"
-					);
+//					browser.execute(
+//						"if (window._browserSim_customScrollBarStylesSetter === undefined) {"
+//							+"window._browserSim_customScrollBarStylesSetter = function () {"
+//							+	"document.removeEventListener('DOMSubtreeModified', window._browserSim_customScrollBarStylesSetter, false);"
+//							+	"var head = document.head;"
+//							+	"var style = document.createElement('style');"
+//							+	"style.type = 'text/css';"
+//							+	"style.id='browserSimStyles';"
+//							+	"head.appendChild(style);"
+//							+	"style.innerText='"
+//							// The following two rules fix a problem with showing scrollbars in Google Mail and similar,
+//							// but autohiding of navigation bar stops to work with it. That is why they are commented.
+//							//+	"html {"
+//							//+		"overflow: hidden;"
+//							//+	"}"
+//							//+	"body {"
+//							//+		"position: absolute;"
+//							//+		"top: 0px;"
+//							//+		"left: 0px;"
+//							//+		"bottom: 0px;"
+//							//+		"right: 0px;"
+//							//+		"margin: 0px;"
+//							//+		"overflow-y: auto;"
+//							//+		"overflow-x: auto;"
+//							//+	"}"
+//							+		"::-webkit-scrollbar {"
+//							+			"width: 5px;"
+//							+			"height: 5px;"
+//							+		"}"
+//							+		"::-webkit-scrollbar-thumb {"
+//							+			"background: rgba(0,0,0,0.4); "
+//							+		"}"
+//							+		"::-webkit-scrollbar-corner, ::-webkit-scrollbar-thumb:window-inactive {"
+//							+			"background: rgba(0,0,0,0.0);"
+//							+		"};"
+//							+	"';"
+//							+"};"
+//							+ "document.addEventListener('DOMSubtreeModified', window._browserSim_customScrollBarStylesSetter, false);"
+//						+ "}"
+//					);
 				}
 			});
 		};
 
-		browser.addOpenWindowListener(new OpenWindowListener() {
-			public void open(WindowEvent event) {
-				if (FireBugLiteLoader.isFireBugPopUp(event)) {
-					FireBugLiteLoader.processFireBugPopUp(event, skin);
-				} else {
-					event.browser = browser;
-				}
-			}
-		});
+//		browser.addOpenWindowListener(new OpenWindowListener() {
+//			public void open(WindowEvent event) {
+//				if (FireBugLiteLoader.isFireBugPopUp(event)) {
+//					FireBugLiteLoader.processFireBugPopUp(event, skin);
+//				} else {
+//					event.browser = browser;
+//				}
+//			}
+//		});
 
 		browser.addLocationListener(new LocationListener() {
-			private BrowserFunction scrollListener = null;
+//			private IDisposable scrollListener = null;
 
 			@SuppressWarnings("nls")
 			public void changed(LocationEvent event) {
-				if (scrollListener != null) {
-					scrollListener.dispose();
-				}
-				scrollListener = new BrowserFunction(((Browser)event.widget), "_browserSim_scrollListener") {
-					public Object function(Object[] arguments) {
-						double pageYOffset = (Double) arguments[0];
-						if (pageYOffset > 0.0) {
-							skin.getShell().getDisplay().asyncExec(new Runnable() {
-								public void run() {
-									if (skin != null && skin.getShell() != null && !skin.getShell().isDisposed()) {
-										skin.setAddressBarVisible(false);
-									}
-								}
-							});
-						}
-						return null;
-					}
-				};
+//				if (scrollListener != null) {
+//					scrollListener.dispose();
+//				}
+//				scrollListener = browser.registerBrowserFunction("_browserSim_scrollListener", new IBrowserFunction() {
+//					public Object function(Object[] arguments) {
+//						double pageYOffset = (Double) arguments[0];
+//						if (pageYOffset > 0.0) {
+//							skin.getShell().getDisplay().asyncExec(new Runnable() {
+//								public void run() {
+//									if (skin != null && skin.getShell() != null && !skin.getShell().isDisposed()) {
+//										skin.setAddressBarVisible(false);
+//									}
+//								}
+//							});
+//						}
+//						return null;
+//					}
+//				});
 
-				Browser browser = (Browser)event.widget;
-				browser.execute(
-								"(function() {" +
-									"var scrollListener = function(e){" +
-										"window._browserSim_scrollListener(window.pageYOffset)" +
-									"};" +
-									"window.addEventListener('scroll', scrollListener);" +
-									"window.addEventListener('beforeunload', function(e){" +
-										"window.removeEventListener('scroll', scrollListener);" +
-										"delete window._browserSim_scrollListener;" +
-									"})" +
-								"})();");
+				IBrowser browser = (IBrowser)event.widget;
+//				browser.execute(
+//								"(function() {" +
+//									"var scrollListener = function(e){" +
+//										"window._browserSim_scrollListener(window.pageYOffset)" +
+//									"};" +
+//									"window.addEventListener('scroll', scrollListener);" +
+//									"window.addEventListener('beforeunload', function(e){" +
+//										"window.removeEventListener('scroll', scrollListener);" +
+//										"delete window._browserSim_scrollListener;" +
+//									"})" +
+//								"})();");
 
 			}
 			
@@ -482,7 +483,7 @@ public class BrowserSim {
 		liveReloadLocationAdapter = new LocationAdapter() {
 			@Override
 			public void changed(LocationEvent event) {
-				Browser browser = (Browser) event.widget;
+				IBrowser browser = (IBrowser) event.widget;
 				browser.execute("if (!window.LiveReload) {" +
 									"window.addEventListener('load', function(){" +
 										"var e = document.createElement('script');" +
@@ -525,7 +526,7 @@ public class BrowserSim {
 		);
 	}
 
-	public BrowserSimBrowser getBrowser() {
+	public IBrowser getBrowser() {
 		return skin != null ? skin.getBrowser() : null;
 	}
 	
@@ -554,7 +555,7 @@ public class BrowserSim {
 	 * 
 	 * Override this method if you need a custom {@link ControlHandler}
 	 */
-	protected ControlHandler createControlHandler(BrowserSimBrowser browser, String homeUrl, SpecificPreferences specificPreferences) {
+	protected ControlHandler createControlHandler(IBrowser browser, String homeUrl, SpecificPreferences specificPreferences) {
 		return new BrowserSimControlHandler(browser, homeUrl, specificPreferences);
 	}
 	

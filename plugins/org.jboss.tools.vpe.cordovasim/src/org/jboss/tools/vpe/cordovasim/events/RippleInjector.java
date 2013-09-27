@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.cordovasim.events;
 
-import org.eclipse.swt.browser.Browser;
+import org.jboss.tools.vpe.browsersim.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 

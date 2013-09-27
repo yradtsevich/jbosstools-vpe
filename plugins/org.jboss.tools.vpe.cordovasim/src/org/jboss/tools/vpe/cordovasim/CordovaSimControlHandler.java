@@ -9,7 +9,7 @@
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
 package org.jboss.tools.vpe.cordovasim;
-import org.eclipse.swt.browser.Browser;
+import org.jboss.tools.vpe.browsersim.browser.Browser;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.ui.BrowserSimControlHandler;
 
