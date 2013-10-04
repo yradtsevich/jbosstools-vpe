@@ -16,6 +16,9 @@ import java.util.List;
 
 import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
 
+/**
+ * @author Yahor Radtsevich (yradtsevich)
+ */
 public class CordovaSimArgs {
 	private static final String DEFAULT_PORT = "0";// any free port
 	private String rootFolder;
