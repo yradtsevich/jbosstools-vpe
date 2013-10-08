@@ -14,6 +14,7 @@ public interface IBrowser {
 	void addLocationListener(LocationListener locationListener);
 	void addStatusTextListener(StatusTextListener statusTextListener);
 	boolean execute(String string);
+	Object evaluate(String script); 
 	boolean forward();
 	boolean back();
 	void setLayoutData(Object layoutData);

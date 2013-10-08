@@ -1,5 +1,6 @@
 package org.jboss.tools.vpe.browsersim.browser;
 
+import java.awt.event.TextEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,12 +11,14 @@ import javafx.embed.swt.FXCanvas;
 import javafx.scene.Scene;
 import javafx.scene.web.WebView;
 import javafx.util.Callback;
+import netscape.javascript.JSException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.browser.StatusTextListener;
+import org.eclipse.swt.browser.TitleEvent;
 import org.eclipse.swt.browser.TitleListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
@@ -25,6 +28,8 @@ import com.sun.javafx.scene.web.Debugger;
 public class WebViewBrowser extends FXCanvas implements IBrowser {
 	private WebView webView;
 	private List<LocationListener> locationListeners = new ArrayList<LocationListener>();
+	private List<TitleListener> titleListeners = new ArrayList<TitleListener>();
+	private List<StatusTextListener> statusTextListeners = new ArrayList<StatusTextListener>();
 
 	public WebViewBrowser(Composite parent) {
 		super(parent, SWT.NONE);
@@ -60,6 +65,18 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 				}
 			}
 		});
+		
+		webView.getEngine().titleProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue ov, String oldState, String newState) {
+				TitleEvent event = new TitleEvent(WebViewBrowser.this);
+				event.widget = WebViewBrowser.this;
+				event.title = newState;
+				for (TitleListener titleListener : titleListeners) {
+					titleListener.changed(event);
+				}
+			}
+		});
 	}
 	
 //	@Override
@@ -73,7 +90,7 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	@Override
 	public void addProgressListener(ProgressListener progressListener) {
 		// TODO Auto-generated method stub
-
+		webView.get
 	}
 
 	@Override
@@ -83,37 +100,58 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 
 	@Override
 	public void addStatusTextListener(StatusTextListener statusTextListener) {
-		// TODO Auto-generated method stub
-
+		statusTextListeners.add(statusTextListener);
 	}
 
 	@Override
 	public boolean execute(String string) {
-		webView.getEngine().executeScript(string);
-		return true; //XXX: should return if everything is OK
+		try {
+			webView.getEngine().executeScript(string);
+			return true;
+		} catch (JSException e) {
+			return false;
+		}
+	}
+	
+	@Override
+	public Object evaluate(String script) {
+		return webView.getEngine().executeScript("(function(){" + script + "}())");
 	}
 
 	@Override
 	public boolean forward() {
-		execute("window.history.forward()");
-		return true; //XXX
+		boolean success = isForwardEnabled();
+		webView.getEngine().getHistory().go(1);
+		return success;
 	}
 
 	@Override
 	public boolean back() {
-		execute("window.history.back()");
-		return true; //XXX
+		boolean success = isBackEnabled();
+		webView.getEngine().getHistory().go(-1);
+		return success;
 	}
 
 	@Override
 	public void addTitleListener(TitleListener titleListener) {
-		// TODO Auto-generated method stub
+		titleListeners.add(titleListener);
 	}
 
 	@Override
 	public String getText() {
-		// TODO Auto-generated method stub
-		return null;
+		String doctypeScript = 
+			"var node = document.doctype;" +
+			"var doctypeText = \"<!DOCTYPE \"" +
+			         "+ node.name" + 
+			         "+ (node.publicId ? ' PUBLIC \"' + node.publicId + '\"' : '')" +
+			         "+ (!node.publicId && node.systemId ? ' SYSTEM' : '')" + 
+			         "+ (node.systemId ? ' \"' + node.systemId + '\"' : '')" +
+			         "+ '>';" +
+			 "return doctypeText";
+		System.out.println(doctypeScript);
+		String doctypeText = (String) evaluate(doctypeScript);
+		String innerHtml = (String) evaluate("return window.document.documentElement.innerHTML");
+		return doctypeText + '\n' + innerHtml;
 	}
 
 	@Override
@@ -123,17 +161,17 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 
 	@Override
 	public boolean isBackEnabled() {
-		return true; //XXX
+		return webView.getEngine().getHistory().getCurrentIndex() > 0;
 	}
 
 	@Override
 	public boolean isForwardEnabled() {
-		return true; //XXX
+		return webView.getEngine().getHistory().getCurrentIndex() + 1 < webView.getEngine().getHistory().getEntries().size();  
 	}
 
 	@Override
 	public void refresh() {
-		execute("window.location.reload()");
+		webView.getEngine().reload();
 	}
 
 	@Override
@@ -161,7 +199,10 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 //				+ "\"params\" : { "
 //				+ 		"\"userAgent\" : \"myuseragent\""
 //				+ "}}");
-		
+		location = location.trim();
+		if (!location.startsWith("http://") && !location.startsWith("https://")) {
+			
+		}
 		webView.getEngine().load(location);
 		
 //		webView.getEngine().impl_getDebugger()
