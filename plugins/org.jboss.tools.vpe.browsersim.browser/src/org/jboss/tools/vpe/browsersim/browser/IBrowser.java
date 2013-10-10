@@ -4,12 +4,10 @@ import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.browser.TitleListener;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 public interface IBrowser {
-
 	void addProgressListener(ProgressListener progressListener);
 	void addLocationListener(LocationListener locationListener);
 	void addStatusTextListener(StatusTextListener statusTextListener);
@@ -34,4 +32,7 @@ public interface IBrowser {
 	boolean setUrl(String location);
 	void stop();
 	IDisposable registerBrowserFunction(String name, IBrowserFunction iBrowserFunction);
+	public void addOpenWindowListener(ExtendedOpenWindowListener listener);
+	boolean isDisposed();
+	boolean forceFocus();
 }

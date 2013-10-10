@@ -1,6 +1,5 @@
 package org.jboss.tools.vpe.browsersim.browser;
 
-import java.awt.event.TextEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +8,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker.State;
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Scene;
+import javafx.scene.web.PopupFeatures;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.util.Callback;
 import netscape.javascript.JSException;
@@ -20,7 +21,7 @@ import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.browser.TitleEvent;
 import org.eclipse.swt.browser.TitleListener;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.widgets.Composite;
 
 import com.sun.javafx.scene.web.Debugger;
@@ -30,6 +31,7 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	private List<LocationListener> locationListeners = new ArrayList<LocationListener>();
 	private List<TitleListener> titleListeners = new ArrayList<TitleListener>();
 	private List<StatusTextListener> statusTextListeners = new ArrayList<StatusTextListener>();
+	private List<ExtendedOpenWindowListener> openWindowListeners = new ArrayList<ExtendedOpenWindowListener>();
 
 	public WebViewBrowser(Composite parent) {
 		super(parent, SWT.NONE);
@@ -71,10 +73,29 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 			public void changed(ObservableValue ov, String oldState, String newState) {
 				TitleEvent event = new TitleEvent(WebViewBrowser.this);
 				event.widget = WebViewBrowser.this;
-				event.title = newState;
+				event.title = newState != null ? newState : "";
 				for (TitleListener titleListener : titleListeners) {
 					titleListener.changed(event);
 				}
+			}
+		});
+		
+		webView.getEngine().setCreatePopupHandler(new Callback<PopupFeatures, WebEngine>() {
+			@Override
+			public WebEngine call(PopupFeatures popupFeatures) {// XXX: use popupFeatures
+				ExtendedWindowEvent event = new ExtendedWindowEvent(WebViewBrowser.this);
+				for (ExtendedOpenWindowListener openWindowListener : openWindowListeners) {
+					openWindowListener.open(event);
+				}
+				
+				WebViewBrowser popupWebViewBrowser = null;
+				if (event.browser instanceof WebViewBrowser) {
+					popupWebViewBrowser = (WebViewBrowser) event.browser;
+				}
+				if (popupWebViewBrowser != null && !popupWebViewBrowser.isDisposed()) {
+					return popupWebViewBrowser.webView.getEngine();
+				}
+				return null;
 			}
 		});
 	}
@@ -90,7 +111,7 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	@Override
 	public void addProgressListener(ProgressListener progressListener) {
 		// TODO Auto-generated method stub
-		webView.get
+		//webView.get
 	}
 
 	@Override
@@ -101,6 +122,11 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	@Override
 	public void addStatusTextListener(StatusTextListener statusTextListener) {
 		statusTextListeners.add(statusTextListener);
+	}
+	
+	@Override
+	public void addOpenWindowListener(ExtendedOpenWindowListener openWindowListener) {
+		openWindowListeners.add(openWindowListener);
 	}
 
 	@Override
@@ -201,7 +227,7 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 //				+ "}}");
 		location = location.trim();
 		if (!location.startsWith("http://") && !location.startsWith("https://")) {
-			
+			location = "http://" + location;
 		}
 		webView.getEngine().load(location);
 		

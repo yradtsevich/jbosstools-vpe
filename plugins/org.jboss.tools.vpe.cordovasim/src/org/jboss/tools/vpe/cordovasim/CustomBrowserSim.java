@@ -10,7 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.cordovasim;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferencesStorage;
@@ -31,7 +31,7 @@ public class CustomBrowserSim extends BrowserSim {
 	}
 	
 	@Override
-	protected ControlHandler createControlHandler(BrowserSimBrowser browser, String homeUrl, SpecificPreferences specificPreferences) {
+	protected ControlHandler createControlHandler(IBrowser browser, String homeUrl, SpecificPreferences specificPreferences) {
 		return new CordovaSimControlHandler(browser, homeUrl, specificPreferences);
 	}
 	
