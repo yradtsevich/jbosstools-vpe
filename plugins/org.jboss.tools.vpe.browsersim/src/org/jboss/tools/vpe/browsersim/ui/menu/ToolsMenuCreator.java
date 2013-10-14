@@ -192,6 +192,35 @@ public class ToolsMenuCreator {
 	}
 	
 	public static void addSyncronizedWindowItem(Menu menu, final BrowserSimSkin skin,
+			final Map<String, Device> devices, final Boolean useSkins, final Boolean enableLiveReload, final int liveReloadPort, final boolean enableTouchEvents, final int orientationAngle, final String homeUrl) {
+		MenuItem syncWindow = new MenuItem(menu, SWT.CASCADE);
+		syncWindow.setText(Messages.BrowserSim_SYNCHRONIZED_WINDOW);
+		Menu subMenu = new Menu(menu);
+		syncWindow.setMenu(subMenu);
+
+		for (final Device device : devices.values()) {
+			MenuItem deviceMenuItem = new MenuItem(subMenu, SWT.RADIO);
+			deviceMenuItem.setText(device.getName());
+			deviceMenuItem.setData(device.getId());
+
+			deviceMenuItem.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					MenuItem menuItem = (MenuItem) e.widget;
+					if (menuItem.getSelection()) {
+						Device selected = devices.get(menuItem.getData());
+						SpecificPreferences sp = new BrowserSimSpecificPreferences(selected.getId(), useSkins,
+								enableLiveReload, liveReloadPort, enableTouchEvents, orientationAngle, null);
+
+						BrowserSim browserSim1 = new BrowserSim(homeUrl, BrowserSimUtil.getParentShell(skin));
+						browserSim1.open(sp, skin.getBrowser().getUrl());
+					}
+				};
+			});
+		}
+	}
+	
+	@Deprecated
+	public static void addSyncronizedWindowItem(Menu menu, final BrowserSimSkin skin,
 			final Map<String, Device> devices, final Boolean useSkins, final Boolean enableLiveReload, final int liveReloadPort, final int orientationAngle, final String homeUrl) {
 		MenuItem syncWindow = new MenuItem(menu, SWT.CASCADE);
 		syncWindow.setText(Messages.BrowserSim_SYNCHRONIZED_WINDOW);
@@ -227,6 +256,19 @@ public class ToolsMenuCreator {
 			public void widgetSelected(SelectionEvent e) {
 				MenuItem menuItem = (MenuItem) e.widget;
 				specificPreferences.setEnableLiveReload(menuItem.getSelection());
+				specificPreferences.notifyObservers();
+			}
+		});
+	}
+	
+	public static void addTouchEventsItem(Menu menu, final SpecificPreferences specificPreferences) {
+		MenuItem liveReloadMenuItem = new MenuItem(menu, SWT.CHECK);
+		liveReloadMenuItem.setText("Enable Touch Events");
+		liveReloadMenuItem.setSelection(specificPreferences.isEnableTouchEvents());
+		liveReloadMenuItem.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				MenuItem menuItem = (MenuItem) e.widget;
+				specificPreferences.setEnableTouchEvents(menuItem.getSelection());
 				specificPreferences.notifyObservers();
 			}
 		});

@@ -20,6 +20,19 @@ public class CordovaSimSpecificPreferences extends SpecificPreferences{
 	private Point cordovaBrowserSize;
 	private Point cordovaBrowserLocation;
 	
+	public CordovaSimSpecificPreferences(String selectedDeviceId, boolean useSkins, boolean enableLiveReload, int liveReloadPort, boolean enableTouchEvents,
+			int orientationAngle, Point location, Point cordovaBrowserLocation, Point cordovaBrowserSize) {
+		super(selectedDeviceId, useSkins, enableLiveReload, liveReloadPort, enableTouchEvents, orientationAngle, location);
+		this.cordovaBrowserLocation = cordovaBrowserLocation;
+		this.cordovaBrowserSize = cordovaBrowserSize;
+	}
+
+	public CordovaSimSpecificPreferences(String selectedDeviceId, boolean useSkins, boolean enableLiveReload, int liveReloadPort, boolean enableTouchEvents,
+			int orientationAngle, Point location) {
+		super(selectedDeviceId, useSkins, enableLiveReload, liveReloadPort, enableTouchEvents, orientationAngle, location);
+	}
+	
+	@Deprecated
 	public CordovaSimSpecificPreferences(String selectedDeviceId, boolean useSkins, boolean enableLiveReload, int liveReloadPort,
 			int orientationAngle, Point location, Point cordovaBrowserLocation, Point cordovaBrowserSize) {
 		super(selectedDeviceId, useSkins, enableLiveReload, liveReloadPort, orientationAngle, location);
@@ -27,6 +40,7 @@ public class CordovaSimSpecificPreferences extends SpecificPreferences{
 		this.cordovaBrowserSize = cordovaBrowserSize;
 	}
 
+	@Deprecated
 	public CordovaSimSpecificPreferences(String selectedDeviceId, boolean useSkins, boolean enableLiveReload, int liveReloadPort,
 			int orientationAngle, Point location) {
 		super(selectedDeviceId, useSkins, enableLiveReload, liveReloadPort, orientationAngle, location);

@@ -18,8 +18,13 @@ import org.eclipse.swt.graphics.Point;
 public class BrowserSimSpecificPreferences extends SpecificPreferences{
 
 	public BrowserSimSpecificPreferences(String selectedDeviceId, boolean useSkins, boolean enableLiveReload,
-			int liveReloadPort, int orientationAngle, Point location) {
-		super(selectedDeviceId, useSkins, enableLiveReload, liveReloadPort, orientationAngle, location);
+			int liveReloadPort, boolean enableTouchEvents, int orientationAngle, Point location) {
+		super(selectedDeviceId, useSkins, enableLiveReload, liveReloadPort, enableTouchEvents, orientationAngle, location);
 	}
 
+	@Deprecated
+	public BrowserSimSpecificPreferences(String selectedDeviceId, boolean useSkins, boolean enableLiveReload,
+			int liveReloadPort, int orientationAngle, Point location) {
+		super(selectedDeviceId, useSkins, enableLiveReload, liveReloadPort, orientationAngle, location);
+	}	
 }

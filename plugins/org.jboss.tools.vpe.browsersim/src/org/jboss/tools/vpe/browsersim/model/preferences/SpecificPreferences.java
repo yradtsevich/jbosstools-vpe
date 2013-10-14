@@ -30,19 +30,27 @@ public abstract class SpecificPreferences extends Observable {
 	private boolean useSkins;
 	private boolean enableLiveReload;
 	private int liveReloadPort;
+	private boolean enableTouchEvents;
 	private int orientationAngle;
 	private Point location;
 	
 
-	public SpecificPreferences(String selectedDeviceId, boolean useSkins, boolean enableLiveReload, int liveReloadPort, int orientationAngle, Point location) {
+	public SpecificPreferences(String selectedDeviceId, boolean useSkins, boolean enableLiveReload, int liveReloadPort, boolean enableTouchEvents, int orientationAngle, Point location) {
 		this.selectedDeviceId = selectedDeviceId;
 		this.useSkins = useSkins;
 		this.enableLiveReload = enableLiveReload;
 		this.liveReloadPort = liveReloadPort;
+		this.enableTouchEvents = enableTouchEvents;
 		this.orientationAngle = orientationAngle;
 		this.location = location;
 	}
+	
+	@Deprecated
+	public SpecificPreferences(String selectedDeviceId, boolean useSkins, boolean enableLiveReload, int liveReloadPort, int orientationAngle, Point location) {
+		this(selectedDeviceId, useSkins, enableLiveReload, liveReloadPort, false, orientationAngle, location);
+	}
 
+	
 	public String getSelectedDeviceId() {
 		return selectedDeviceId;
 	}
@@ -91,6 +99,17 @@ public abstract class SpecificPreferences extends Observable {
 		}
 	}
 
+	public boolean isEnableTouchEvents() {
+		return enableTouchEvents;
+	}
+
+	public void setEnableTouchEvents(boolean enableTouchEvents) {
+		if (this.enableTouchEvents != enableTouchEvents) {
+			this.enableTouchEvents = enableTouchEvents;
+			setChanged();
+		}
+	}
+
 	public int getOrientationAngle() {
 		return orientationAngle;
 	}
@@ -115,6 +134,7 @@ public abstract class SpecificPreferences extends Observable {
 		setUseSkins(sp.getUseSkins());
 		setEnableLiveReload(sp.isEnableLiveReload());
 		setLiveReloadPort(sp.getLiveReloadPort());
+		setEnableTouchEvents(sp.isEnableTouchEvents());
 		setOrientationAngle(sp.getOrientationAngle());
 		setLocation(sp.getLocation());
 	}
