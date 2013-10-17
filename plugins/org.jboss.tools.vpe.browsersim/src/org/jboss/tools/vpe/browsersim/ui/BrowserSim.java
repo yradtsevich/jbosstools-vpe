@@ -328,43 +328,43 @@ public class BrowserSim {
 //				}
 //			}
 //		});
-
+		
 		browser.addLocationListener(new LocationListener() {
-//			private IDisposable scrollListener = null;
+			private IDisposable scrollListener = null;
 
 			@SuppressWarnings("nls")
 			public void changed(LocationEvent event) {
-//				if (scrollListener != null) {
-//					scrollListener.dispose();
-//				}
-//				scrollListener = browser.registerBrowserFunction("_browserSim_scrollListener", new IBrowserFunction() {
-//					public Object function(Object[] arguments) {
-//						double pageYOffset = (Double) arguments[0];
-//						if (pageYOffset > 0.0) {
-//							skin.getShell().getDisplay().asyncExec(new Runnable() {
-//								public void run() {
-//									if (skin != null && skin.getShell() != null && !skin.getShell().isDisposed()) {
-//										skin.setAddressBarVisible(false);
-//									}
-//								}
-//							});
-//						}
-//						return null;
-//					}
-//				});
+				if (scrollListener != null) {
+					scrollListener.dispose();
+				}
+				scrollListener = browser.registerBrowserFunction("_browserSim_scrollListener", new IBrowserFunction() {
+					public Object function(Object[] arguments) {
+						double pageYOffset = (Double) arguments[0];
+						if (pageYOffset > 0.0) {
+							skin.getShell().getDisplay().asyncExec(new Runnable() {
+								public void run() {
+									if (skin != null && skin.getShell() != null && !skin.getShell().isDisposed()) {
+										skin.setAddressBarVisible(false);
+									}
+								}
+							});
+						}
+						return null;
+					}
+				});
 
 				IBrowser browser = (IBrowser)event.widget;
-//				browser.execute(
-//								"(function() {" +
-//									"var scrollListener = function(e){" +
-//										"window._browserSim_scrollListener(window.pageYOffset)" +
-//									"};" +
-//									"window.addEventListener('scroll', scrollListener);" +
-//									"window.addEventListener('beforeunload', function(e){" +
-//										"window.removeEventListener('scroll', scrollListener);" +
-//										"delete window._browserSim_scrollListener;" +
-//									"})" +
-//								"})();");
+				browser.execute(
+								"(function() {" +
+									"var scrollListener = function(e){" +
+										"window._browserSim_scrollListener(window.pageYOffset)" +
+									"};" +
+									"window.addEventListener('scroll', scrollListener);" +
+									"window.addEventListener('beforeunload', function(e){" +
+										"window.removeEventListener('scroll', scrollListener);" +
+										"delete window._browserSim_scrollListener;" +
+									"})" +
+								"})();");
 
 			}
 			

@@ -7,22 +7,28 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker.State;
 import javafx.embed.swt.FXCanvas;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.scene.Scene;
 import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.util.Callback;
 import netscape.javascript.JSException;
+import netscape.javascript.JSObject;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
+import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.browser.TitleEvent;
 import org.eclipse.swt.browser.TitleListener;
 import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.w3c.dom.Document;
 
 import com.sun.javafx.scene.web.Debugger;
 
@@ -32,37 +38,56 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	private List<TitleListener> titleListeners = new ArrayList<TitleListener>();
 	private List<StatusTextListener> statusTextListeners = new ArrayList<StatusTextListener>();
 	private List<ExtendedOpenWindowListener> openWindowListeners = new ArrayList<ExtendedOpenWindowListener>();
-
+	private List<ProgressListener> progressListeners = new ArrayList<ProgressListener>();
+	
 	public WebViewBrowser(Composite parent) {
 		super(parent, SWT.NONE);
 		webView = new WebView();
 		this.setScene(new Scene(webView));
 		
 		Debugger debugger = webView.getEngine().impl_getDebugger();
-		debugger.setMessageCallback(new Callback<String, Void>() {
-			@Override
-			public Void call(String message) {
-				System.out.println(message);
-				return null;
-			}
-		});
+
 		debugger.setEnabled(true);
 		debugger.sendMessage("{\"id\" : 1232, \"method\" : \"Network.enable\"}");
 		
-		webView.getEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<State>() {
+		webView.getEngine().getLoadWorker().progressProperty().addListener(new ChangeListener<Number>() {
 			@Override
-			public void changed(ObservableValue ov, State oldState, State newState) {
-				if (newState == State.SUCCEEDED || newState == State.RUNNING) {
+			public void changed(ObservableValue<? extends Number> observable,
+					Number oldValue, Number newValue) {
+				if (oldValue.doubleValue() == 0.0 && newValue.doubleValue() > 0.0) {
 					LocationEvent event = new LocationEvent(WebViewBrowser.this);
 					event.widget = WebViewBrowser.this;
 					event.location = webView.getEngine().getLocation();
 					event.top = true; // XXX
 					for (LocationListener locationListener: locationListeners) {
-						if (newState == State.SUCCEEDED) {
-							locationListener.changed(event);
-						} else if (newState == State.RUNNING) {
-							locationListener.changing(event); //XXX: not sure this is correct
-						}
+						locationListener.changed(event);
+					}
+				}
+			}
+		});
+		
+		webView.getEngine().getLoadWorker().progressProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observable,
+				Number oldValue, Number newValue) {
+				ProgressEvent progressEvent = new ProgressEvent(WebViewBrowser.this);
+//				double maximumValue = webView.getEngine().getLoadWorker().getTotalWork();
+				double maximumValue = 1.0;
+				
+				progressEvent.total = 100;
+				if (maximumValue > 0.0 && newValue.doubleValue() >= maximumValue) {
+					progressEvent.current = progressEvent.total;
+					for (ProgressListener progressListener : progressListeners) {
+						progressListener.completed(progressEvent);
+					}
+				} else {
+					if (maximumValue <= 0.0) {
+						progressEvent.current = progressEvent.total / 2;
+					} else {// maximumValue undefined
+						progressEvent.current = (int) (newValue.doubleValue() / maximumValue * progressEvent.total);
+					}
+					for (ProgressListener progressListener : progressListeners) {
+						progressListener.changed(progressEvent);
 					}
 				}
 			}
@@ -77,6 +102,13 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 				for (TitleListener titleListener : titleListeners) {
 					titleListener.changed(event);
 				}
+			}
+		});
+		
+		webView.getEngine().setOnAlert(new EventHandler<WebEvent<String>>() {
+			@Override
+			public void handle(WebEvent<String> event) {
+				System.out.println("ALERT:" + event.getData());
 			}
 		});
 		
@@ -110,8 +142,7 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 
 	@Override
 	public void addProgressListener(ProgressListener progressListener) {
-		// TODO Auto-generated method stub
-		//webView.get
+		progressListeners.add(progressListener);
 	}
 
 	@Override
@@ -174,7 +205,6 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 			         "+ (node.systemId ? ' \"' + node.systemId + '\"' : '')" +
 			         "+ '>';" +
 			 "return doctypeText";
-		System.out.println(doctypeScript);
 		String doctypeText = (String) evaluate(doctypeScript);
 		String innerHtml = (String) evaluate("return window.document.documentElement.innerHTML");
 		return doctypeText + '\n' + innerHtml;
@@ -226,7 +256,7 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 //				+ 		"\"userAgent\" : \"myuseragent\""
 //				+ "}}");
 		location = location.trim();
-		if (!location.startsWith("http://") && !location.startsWith("https://")) {
+		if (!location.contains(":")) {
 			location = "http://" + location;
 		}
 		webView.getEngine().load(location);
@@ -245,9 +275,24 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	}
 
 	@Override
-	public IDisposable registerBrowserFunction(String name,
-			IBrowserFunction iBrowserFunction) {
-		return null;
+	public IDisposable registerBrowserFunction(final String name, final IBrowserFunction iBrowserFunction) {
+		JSObject window = (JSObject) evaluate("return window");
+		
+		final String id = "__webViewProxy_" + name;
+		window.setMember(id, new BrowserFunctionProxy(iBrowserFunction));
+		evaluate("window['" + name + "'] = function(){return window['" + id + "'].func(arguments)}");
+		
+		return new IDisposable() {
+			@Override
+			public boolean isDisposed() {
+				return (Boolean) evaluate("return window['" + name + "'] === undefined && window['" + id + "'] === undefined");
+			}
+			
+			@Override
+			public void dispose() {
+				evaluate("delete window['" + name + "']; delete window['" + id + "']");
+			}
+		}; 
 	}
 
 	public Debugger getDebugger() {
