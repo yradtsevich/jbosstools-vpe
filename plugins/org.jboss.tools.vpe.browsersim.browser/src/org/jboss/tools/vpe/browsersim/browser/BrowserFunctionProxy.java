@@ -12,7 +12,6 @@ public class BrowserFunctionProxy {
 
 	public Object func(JSObject arguments) {
 		int length = (Integer) arguments.getMember("length");
-		System.out.println(length);
 		Object[] argumentsArray = new Object[length];
 		for (int i = 0; i < length; i++) {
 			Object argument = arguments.getSlot(i);

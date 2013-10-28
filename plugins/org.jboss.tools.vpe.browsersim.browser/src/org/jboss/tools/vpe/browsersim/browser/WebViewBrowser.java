@@ -5,12 +5,11 @@ import java.util.List;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Worker.State;
 import javafx.embed.swt.FXCanvas;
 import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.scene.Scene;
 import javafx.scene.web.PopupFeatures;
+import javafx.scene.web.PromptData;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
@@ -26,9 +25,8 @@ import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.browser.TitleEvent;
 import org.eclipse.swt.browser.TitleListener;
-import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.w3c.dom.Document;
+import org.eclipse.swt.widgets.MessageBox;
 
 import com.sun.javafx.scene.web.Debugger;
 
@@ -45,19 +43,19 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 		webView = new WebView();
 		this.setScene(new Scene(webView));
 		
-		Debugger debugger = webView.getEngine().impl_getDebugger();
+		Debugger debugger = getEngine().impl_getDebugger();
 
 		debugger.setEnabled(true);
-		debugger.sendMessage("{\"id\" : 1232, \"method\" : \"Network.enable\"}");
+		debugger.sendMessage("{\"id\" : -1, \"method\" : \"Network.enable\"}");
 		
-		webView.getEngine().getLoadWorker().progressProperty().addListener(new ChangeListener<Number>() {
+		getEngine().getLoadWorker().progressProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable,
 					Number oldValue, Number newValue) {
 				if (oldValue.doubleValue() == 0.0 && newValue.doubleValue() > 0.0) {
 					LocationEvent event = new LocationEvent(WebViewBrowser.this);
 					event.widget = WebViewBrowser.this;
-					event.location = webView.getEngine().getLocation();
+					event.location = getEngine().getLocation();
 					event.top = true; // XXX
 					for (LocationListener locationListener: locationListeners) {
 						locationListener.changed(event);
@@ -66,7 +64,7 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 			}
 		});
 		
-		webView.getEngine().getLoadWorker().progressProperty().addListener(new ChangeListener<Number>() {
+		getEngine().getLoadWorker().progressProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable,
 				Number oldValue, Number newValue) {
@@ -93,9 +91,9 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 			}
 		});
 		
-		webView.getEngine().titleProperty().addListener(new ChangeListener<String>() {
+		getEngine().titleProperty().addListener(new ChangeListener<String>() {
 			@Override
-			public void changed(ObservableValue ov, String oldState, String newState) {
+			public void changed(ObservableValue<? extends String> ov, String oldState, String newState) {
 				TitleEvent event = new TitleEvent(WebViewBrowser.this);
 				event.widget = WebViewBrowser.this;
 				event.title = newState != null ? newState : "";
@@ -105,14 +103,34 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 			}
 		});
 		
-		webView.getEngine().setOnAlert(new EventHandler<WebEvent<String>>() {
+		getEngine().setOnAlert(new EventHandler<WebEvent<String>>() {
 			@Override
 			public void handle(WebEvent<String> event) {
-				System.out.println("ALERT:" + event.getData());
+				MessageBox messageBox = new MessageBox(getShell());
+				messageBox.setMessage(event.getData());
+				messageBox.open();
 			}
 		});
 		
-		webView.getEngine().setCreatePopupHandler(new Callback<PopupFeatures, WebEngine>() {
+		getEngine().setConfirmHandler(new Callback<String, Boolean>() {
+			@Override
+			public Boolean call(String message) {
+				MessageBox messageBox = new MessageBox(getShell());
+				messageBox.setMessage(message);
+				return messageBox.open() == SWT.OK;
+			}
+		});
+		
+		getEngine().setPromptHandler(new Callback<PromptData, String>() {
+			
+			@Override
+			public String call(PromptData param) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		});
+		
+		getEngine().setCreatePopupHandler(new Callback<PopupFeatures, WebEngine>() {
 			@Override
 			public WebEngine call(PopupFeatures popupFeatures) {// XXX: use popupFeatures
 				ExtendedWindowEvent event = new ExtendedWindowEvent(WebViewBrowser.this);
@@ -125,24 +143,11 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 					popupWebViewBrowser = (WebViewBrowser) event.browser;
 				}
 				if (popupWebViewBrowser != null && !popupWebViewBrowser.isDisposed()) {
-					return popupWebViewBrowser.webView.getEngine();
+					return popupWebViewBrowser.getEngine();
 				}
 				return null;
 			}
 		});
-	}
-	
-//	@Override
-//	public Point computeSize(int wHint, int hHint, boolean changed) {
-//        getScene().getWindow().sizeToScene();
-//        int width = (int) getScene().getWidth();
-//        int height = (int) getScene().getHeight();
-//        return new Point(width, height);
-//    }
-
-	@Override
-	public void addProgressListener(ProgressListener progressListener) {
-		progressListeners.add(progressListener);
 	}
 
 	@Override
@@ -151,47 +156,116 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	}
 
 	@Override
-	public void addStatusTextListener(StatusTextListener statusTextListener) {
-		statusTextListeners.add(statusTextListener);
+	public void removeLocationListener(LocationListener locationListener) {
+		locationListeners.remove(locationListener);
 	}
-	
+
 	@Override
 	public void addOpenWindowListener(ExtendedOpenWindowListener openWindowListener) {
 		openWindowListeners.add(openWindowListener);
 	}
 
 	@Override
-	public boolean execute(String string) {
-		try {
-			webView.getEngine().executeScript(string);
-			return true;
-		} catch (JSException e) {
-			return false;
-		}
+	public void removeOpenWindowListener(ExtendedOpenWindowListener listener) {
+		openWindowListeners.remove(listener);
+	}
+
+	@Override
+	public void addProgressListener(ProgressListener progressListener) {
+		progressListeners.add(progressListener);
 	}
 	
 	@Override
-	public Object evaluate(String script) {
-		return webView.getEngine().executeScript("(function(){" + script + "}())");
+	public void removeProgressListener(ProgressListener progressListener) {
+		progressListeners.remove(progressListener);
 	}
 
 	@Override
-	public boolean forward() {
-		boolean success = isForwardEnabled();
-		webView.getEngine().getHistory().go(1);
-		return success;
+	public void addStatusTextListener(StatusTextListener statusTextListener) {
+		statusTextListeners.add(statusTextListener);
 	}
 
 	@Override
-	public boolean back() {
-		boolean success = isBackEnabled();
-		webView.getEngine().getHistory().go(-1);
-		return success;
+	public void removeStatusTextListener(StatusTextListener statusTextListener) {
+		statusTextListeners.remove(statusTextListeners);
 	}
 
 	@Override
 	public void addTitleListener(TitleListener titleListener) {
 		titleListeners.add(titleListener);
+	}
+	
+	@Override
+	public void removeTitleListener(TitleListener titleListener) {
+		titleListeners.remove(titleListener);
+	}
+
+	@Override
+	public boolean back() {
+		boolean success = isBackEnabled();
+		if (success) {
+			getEngine().getHistory().go(-1);
+		}
+		return success;
+	}
+
+	@Override
+	public boolean forward() {
+		boolean success = isForwardEnabled();
+		if (success) {
+			getEngine().getHistory().go(1);
+		}
+		return success;
+	}
+
+	@Override
+	public void refresh() {
+		getEngine().reload();
+	}
+
+	@Override
+	public void stop() {
+		execute("window.stop()");
+	}
+
+	@Override
+	public Object evaluate(String script) {
+		return getEngine().executeScript("(function(){" + script + "}())");
+	}
+
+	@Override
+	public boolean execute(String string) {
+		try {
+			getEngine().executeScript(string);
+			return true;
+		} catch (JSException e) {
+			return false;
+		}
+	}
+
+	@Override
+	public IDisposable registerBrowserFunction(final String name, final IBrowserFunction iBrowserFunction) {
+		JSObject window = (JSObject) evaluate("return window");
+		
+		final String id = "__webViewProxy_" + name;
+		window.setMember(id, new BrowserFunctionProxy(iBrowserFunction));
+		evaluate("window['" + name + "'] = function(){return window['" + id + "'].func(arguments)}");
+		
+		return new IDisposable() {
+			@Override
+			public void dispose() {
+				evaluate("delete window['" + name + "']; delete window['" + id + "']");
+			}
+			
+			@Override
+			public boolean isDisposed() {
+				return (Boolean) evaluate("return window['" + name + "'] === undefined && window['" + id + "'] === undefined");
+			}
+		}; 
+	}
+
+	public Debugger getDebugger() {
+		return getEngine().impl_getDebugger();
 	}
 
 	@Override
@@ -212,90 +286,45 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 
 	@Override
 	public String getUrl() {
-		return webView.getEngine().getLocation();
+		return getEngine().getLocation();
 	}
 
 	@Override
 	public boolean isBackEnabled() {
-		return webView.getEngine().getHistory().getCurrentIndex() > 0;
+		return getEngine().getHistory().getCurrentIndex() > 0;
 	}
 
 	@Override
 	public boolean isForwardEnabled() {
-		return webView.getEngine().getHistory().getCurrentIndex() + 1 < webView.getEngine().getHistory().getEntries().size();  
-	}
-
-	@Override
-	public void refresh() {
-		webView.getEngine().reload();
-	}
-
-	@Override
-	public void removeLocationListener(LocationListener locationListener) {
-		locationListeners.remove(locationListener);
-	}
-
-	@Override
-	public void removeProgressListener(ProgressListener progressListener) {
-		// TODO Auto-generated method stub
+		return getEngine().getHistory().getCurrentIndex() + 1 < getEngine().getHistory().getEntries().size();  
 	}
 
 	@Override
 	public void setDefaultUserAgent(String userAgent) {
-		webView.getEngine().impl_getDebugger().sendMessage("{\"id\" : 123, \"method\" : \"Network.setUserAgentOverride\","
+		if (userAgent == null) {
+			userAgent = ""; // empty string means 'default value' for DevTools
+		}
+		String escapedUserAgent = userAgent
+				.replace("\\", "\\\\")
+				.replace("\"", "\\\"");
+		getDebugger().sendMessage("{\"id\" : -1, \"method\" : \"Network.setUserAgentOverride\","
 				+ "\"params\" : { "
-				+ 		"\"userAgent\" : \""+ userAgent +"\"" //XXX: escape userAgent
+				+ 		"\"userAgent\" : \""+ escapedUserAgent +"\""
 				+ "}}");
 	}
 
 	@Override
 	public boolean setUrl(String location) {
-//		webView.getEngine().impl_getDebugger()
-//			.sendMessage("{\"id\" : 123, \"method\" : \"Network.setUserAgentOverride\","
-//				+ "\"params\" : { "
-//				+ 		"\"userAgent\" : \"myuseragent\""
-//				+ "}}");
 		location = location.trim();
 		if (!location.contains(":")) {
 			location = "http://" + location;
 		}
-		webView.getEngine().load(location);
-		
-//		webView.getEngine().impl_getDebugger()
-//		.sendMessage("{\"id\" : 123, \"method\" : \"Network.setUserAgentOverride\","
-//			+ "\"params\" : { "
-//			+ 		"\"userAgent\" : \"myuseragent\""
-//			+ "}}");
+		getEngine().load(location);
+
 		return true; //XXX
 	}
-
-	@Override
-	public void stop() {
-		execute("window.stop()");
-	}
-
-	@Override
-	public IDisposable registerBrowserFunction(final String name, final IBrowserFunction iBrowserFunction) {
-		JSObject window = (JSObject) evaluate("return window");
-		
-		final String id = "__webViewProxy_" + name;
-		window.setMember(id, new BrowserFunctionProxy(iBrowserFunction));
-		evaluate("window['" + name + "'] = function(){return window['" + id + "'].func(arguments)}");
-		
-		return new IDisposable() {
-			@Override
-			public boolean isDisposed() {
-				return (Boolean) evaluate("return window['" + name + "'] === undefined && window['" + id + "'] === undefined");
-			}
-			
-			@Override
-			public void dispose() {
-				evaluate("delete window['" + name + "']; delete window['" + id + "']");
-			}
-		}; 
-	}
-
-	public Debugger getDebugger() {
-		return webView.getEngine().impl_getDebugger();
+	
+	protected WebEngine getEngine() {
+		return webView.getEngine();
 	}
 }

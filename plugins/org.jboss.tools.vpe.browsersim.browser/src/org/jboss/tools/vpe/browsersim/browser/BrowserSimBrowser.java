@@ -1,11 +1,17 @@
 package org.jboss.tools.vpe.browsersim.browser;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.OpenWindowListener;
 import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.widgets.Composite;
 
-public abstract class BrowserSimBrowser extends Browser implements org.jboss.tools.vpe.browsersim.browser.IBrowser {
+public abstract class BrowserSimBrowser extends Browser implements IBrowser {
+	private Map<ExtendedOpenWindowListener, OpenWindowListener> openWindowListenerMap =
+			new HashMap<ExtendedOpenWindowListener, OpenWindowListener>();
+	
 	public BrowserSimBrowser(Composite parent, int style) {
 		super(parent, style);
 	}
@@ -18,7 +24,7 @@ public abstract class BrowserSimBrowser extends Browser implements org.jboss.too
 
 	@Override
 	public void addOpenWindowListener(final ExtendedOpenWindowListener extendedListener) {
-		addOpenWindowListener(new OpenWindowListener() {
+		OpenWindowListener listener = new OpenWindowListener() {
 			@Override
 			public void open(WindowEvent event) {
 				ExtendedWindowEvent extendedEvent = new ExtendedWindowEvent(event.widget);
@@ -38,6 +44,16 @@ public abstract class BrowserSimBrowser extends Browser implements org.jboss.too
 					event.browser = (Browser) extendedEvent.browser;
 				}
 			}
-		});		
+		};
+		addOpenWindowListener(listener);
+		openWindowListenerMap.put(extendedListener, listener);
+	}
+	
+	@Override
+	public void removeOpenWindowListener(ExtendedOpenWindowListener extendedListener) {
+		OpenWindowListener listener = openWindowListenerMap.remove(extendedListener);
+		if (listener != null) {
+			removeOpenWindowListener(listener);
+		}
 	}
 }
