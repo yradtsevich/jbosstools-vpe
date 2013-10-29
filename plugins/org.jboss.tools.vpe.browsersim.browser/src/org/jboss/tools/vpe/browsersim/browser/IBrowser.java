@@ -4,6 +4,7 @@ import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.browser.TitleListener;
+import org.eclipse.swt.browser.VisibilityWindowListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
@@ -18,6 +19,8 @@ public interface IBrowser {
 	void removeStatusTextListener(StatusTextListener statusTextListener);
 	void addTitleListener(TitleListener titleListener);
 	void removeTitleListener(TitleListener titleListener);
+	void addVisibilityWindowListener (ExtendedVisibilityWindowListener listener);
+	void removeVisibilityWindowListener (ExtendedVisibilityWindowListener listener);
 	
 	boolean back();
 	boolean forward();

@@ -37,17 +37,18 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	private List<StatusTextListener> statusTextListeners = new ArrayList<StatusTextListener>();
 	private List<ExtendedOpenWindowListener> openWindowListeners = new ArrayList<ExtendedOpenWindowListener>();
 	private List<ProgressListener> progressListeners = new ArrayList<ProgressListener>();
+	private List<ExtendedVisibilityWindowListener> visibilityWindowListeners = new ArrayList<ExtendedVisibilityWindowListener>();
 	
 	public WebViewBrowser(Composite parent) {
 		super(parent, SWT.NONE);
 		webView = new WebView();
+
 		this.setScene(new Scene(webView));
 		
 		Debugger debugger = getEngine().impl_getDebugger();
 
 		debugger.setEnabled(true);
 		debugger.sendMessage("{\"id\" : -1, \"method\" : \"Network.enable\"}");
-		
 		getEngine().getLoadWorker().progressProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable,
@@ -143,6 +144,9 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 					popupWebViewBrowser = (WebViewBrowser) event.browser;
 				}
 				if (popupWebViewBrowser != null && !popupWebViewBrowser.isDisposed()) {
+					for (ExtendedVisibilityWindowListener visibilityWindowListener : visibilityWindowListeners) {
+						visibilityWindowListener.show(event);
+					}
 					return popupWebViewBrowser.getEngine();
 				}
 				return null;
@@ -198,6 +202,16 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	@Override
 	public void removeTitleListener(TitleListener titleListener) {
 		titleListeners.remove(titleListener);
+	}
+	
+	@Override
+	public void addVisibilityWindowListener(ExtendedVisibilityWindowListener listener) {
+		visibilityWindowListeners.add(listener);		
+	}
+
+	@Override
+	public void removeVisibilityWindowListener(ExtendedVisibilityWindowListener listener) {
+		visibilityWindowListeners.remove(listener);
 	}
 
 	@Override
