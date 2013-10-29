@@ -1,7 +1,15 @@
 package org.jboss.tools.vpe.browsersim.browser;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -31,23 +39,135 @@ import org.eclipse.swt.widgets.MessageBox;
 import com.sun.javafx.scene.web.Debugger;
 
 public class WebViewBrowser extends FXCanvas implements IBrowser {
-	private WebView webView;
+	private IWebView webView;
 	private List<LocationListener> locationListeners = new ArrayList<LocationListener>();
 	private List<TitleListener> titleListeners = new ArrayList<TitleListener>();
 	private List<StatusTextListener> statusTextListeners = new ArrayList<StatusTextListener>();
 	private List<ExtendedOpenWindowListener> openWindowListeners = new ArrayList<ExtendedOpenWindowListener>();
 	private List<ProgressListener> progressListeners = new ArrayList<ProgressListener>();
 	
+	Map<Class<?>, String> interfaceToOriginalMap = new HashMap<Class<?>, String>();
+	{
+		interfaceToOriginalMap.put(IWebView.class, "javafx.scene.web.WebView");
+		interfaceToOriginalMap.put(IWebEngine.class, "javafx.scene.web.WebEngine");
+	}
+	
+	<T> T createProxy(ClassLoader cl, final Object originalInstance, Class<T> proxyInterface) {
+		return (T) Proxy.newProxyInstance(cl, new Class<?>[]{proxyInterface}, new JavaFXProxyHandler(originalInstance, cl));
+	}
+	
+	Object proxifyIfNeeded(ClassLoader cl, Object originalInstance) throws Exception {
+		if (originalInstance == null) {
+			return null;
+		}
+		Set<Entry<Class<?>, String>> interfaceToOriginalEntries = interfaceToOriginalMap.entrySet();
+		for (Entry<Class<?>, String> interfaceToOriginalEntry : interfaceToOriginalEntries) {
+			String originalClassName = interfaceToOriginalEntry.getValue();
+			Class<?> originalClass = cl.loadClass(originalClassName);
+			if (originalClass.isAssignableFrom(originalInstance.getClass())) {
+				Class<?> proxyInterface = interfaceToOriginalEntry.getKey();
+				return createProxy(cl, originalInstance, proxyInterface);
+			}
+		}
+		return originalInstance;
+	}
+	
+	Object deproxifyIfNeeded(ClassLoader cl, Object instance) {
+		if (instance == null) {
+			return null;
+		}
+		if (!Proxy.isProxyClass(instance.getClass())) {
+			return instance;
+		}
+		
+		InvocationHandler invocationHandler = Proxy.getInvocationHandler(instance);
+		if (invocationHandler instanceof JavaFXProxyHandler) {
+			return ((JavaFXProxyHandler)invocationHandler).getOriginalInstance();
+		}
+		
+		return instance;
+	}
+	
+	class JavaFXProxyHandler implements InvocationHandler {
+		private Object originalInstance;
+		private ClassLoader cl;
+		public JavaFXProxyHandler(Object originalInstance, ClassLoader cl) {
+			this.originalInstance = originalInstance;
+			this.cl = cl;
+		}
+
+		@Override
+		public Object invoke(Object proxy, Method proxyMethod, Object[] proxiedArgs)
+				throws Throwable {
+			if (proxiedArgs == null) {
+				proxiedArgs = new Object[0];
+			}
+			
+			Object[] args = new Object[proxiedArgs.length];
+			for (int i = 0; i < proxiedArgs.length; i++) {
+				args[i]  = deproxifyIfNeeded(cl, proxiedArgs[i]);
+			}
+			
+			Object result = invoke(originalInstance, args, proxyMethod.getName());
+			return proxifyIfNeeded(cl, result);
+		}
+		
+		private Object invoke(Object targetObject, Object[] parameters,
+		        String methodName) throws Exception {
+		    for (Method method : targetObject.getClass().getMethods()) {
+		        if (!method.getName().equals(methodName)) {
+		            continue;
+		        }
+		        Class<?>[] parameterTypes = method.getParameterTypes();
+		        boolean matches = true;
+		        for (int i = 0; i < parameterTypes.length; i++) {
+		            if (!parameterTypes[i].isAssignableFrom(parameters[i]
+		                    .getClass())) {
+		                matches = false;
+		                break;
+		            }
+		        }
+		        if (matches) {
+		            // obtain a Class[] based on the passed arguments as Object[]
+		            return method.invoke(targetObject, parameters);
+		        }
+		    }
+		    
+		    throw new Exception();//XXX
+		}
+
+
+		public Object getOriginalInstance() {
+			return originalInstance;
+		}
+	}
+	
+	<T> T create(Class<T> type, Object... constructorArgs) {
+		try {
+			ClassLoader cl = getClass().getClassLoader();
+			final Class<?> originalClass = cl.loadClass(interfaceToOriginalMap.get(type));
+			List<Class> constructorTypes = new ArrayList<Class>();
+			for (Object constructorArg : constructorArgs) {
+				constructorTypes.add(cl.loadClass( interfaceToOriginalMap.get(constructorArg.getClass()) ));
+			}
+			Object originalInstance = originalClass.getConstructor(
+					constructorTypes.toArray(new Class[constructorTypes.size()])).newInstance(constructorArgs);
+			return createProxy(cl, originalInstance, type);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public WebViewBrowser(Composite parent) {
 		super(parent, SWT.NONE);
-		webView = new WebView();
-		this.setScene(new Scene(webView));
+		webView = create(IWebView.class);
+
+//		this.setScene(new Scene(webView));
 		
 		Debugger debugger = getEngine().impl_getDebugger();
 
 		debugger.setEnabled(true);
 		debugger.sendMessage("{\"id\" : -1, \"method\" : \"Network.enable\"}");
-		
 		getEngine().getLoadWorker().progressProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observable,
@@ -130,9 +250,9 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 			}
 		});
 		
-		getEngine().setCreatePopupHandler(new Callback<PopupFeatures, WebEngine>() {
+		getEngine().setCreatePopupHandler(new Callback<PopupFeatures, IWebEngine>() {
 			@Override
-			public WebEngine call(PopupFeatures popupFeatures) {// XXX: use popupFeatures
+			public IWebEngine call(PopupFeatures popupFeatures) {// XXX: use popupFeatures
 				ExtendedWindowEvent event = new ExtendedWindowEvent(WebViewBrowser.this);
 				for (ExtendedOpenWindowListener openWindowListener : openWindowListeners) {
 					openWindowListener.open(event);
@@ -324,7 +444,7 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 		return true; //XXX
 	}
 	
-	protected WebEngine getEngine() {
+	protected IWebEngine getEngine() {
 		return webView.getEngine();
 	}
 }
