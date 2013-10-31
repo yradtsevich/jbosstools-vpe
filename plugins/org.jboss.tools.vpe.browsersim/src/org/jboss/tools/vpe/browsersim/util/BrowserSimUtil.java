@@ -136,9 +136,11 @@ public class BrowserSimUtil {
 	}
 	
 	public static void setShellLocation(Shell shell, Point shellSize, Point location) {
-		Rectangle r = new Rectangle(location.x, location.y, shellSize.x, shellSize.y);
-		if (shell.getDisplay().getClientArea().intersects(r)) {
-			shell.setLocation(location);
+		if (location != null) {
+			Rectangle r = new Rectangle(location.x, location.y, shellSize.x, shellSize.y);
+			if (shell.getDisplay().getClientArea().intersects(r)) {
+				shell.setLocation(location);
+			}
 		}
 		BrowserSimUtil.fixShellLocation(shell);
 	}

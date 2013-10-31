@@ -11,6 +11,7 @@
 package org.jboss.tools.vpe.browsersim.ui.debug.firebug;
 
 import org.eclipse.swt.SWT;
+import org.jboss.tools.vpe.browsersim.browser.ExtendedCloseWindowListener;
 import org.jboss.tools.vpe.browsersim.browser.ExtendedVisibilityWindowListener;
 import org.jboss.tools.vpe.browsersim.browser.ExtendedWindowEvent;
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
@@ -72,7 +73,7 @@ public class FireBugLiteLoader {
 		}
 	}
 	
-	public static boolean isFireBugPopUp(WindowEvent openWindowEvent) {
+	public static boolean isFireBugPopUp(ExtendedWindowEvent openWindowEvent) {
 		IBrowser parentBrowser = (IBrowser) openWindowEvent.widget;
 		return Boolean.TRUE.equals(parentBrowser.evaluate("return !!window._fireBugLiteLoading"));
 	}
@@ -100,9 +101,6 @@ public class FireBugLiteLoader {
 			
 			@Override
 			public void hide(ExtendedWindowEvent event) {
-				IBrowser browser = (IBrowser)event.widget;
-				Shell shell = browser.getShell();
-				shell.setVisible(false);
 			}
 		});
 		
@@ -126,13 +124,14 @@ public class FireBugLiteLoader {
 				}
 			});
 		} else {
-//			fireBugBrowser.addCloseWindowListener(new CloseWindowListener() {
-//				public void close(WindowEvent event) {
-//					IBrowser browser = (IBrowser)event.widget;
-//					Shell shell = browser.getShell();
-//					shell.close();
-//				}
-//			});
+			fireBugBrowser.addCloseWindowListener(new ExtendedCloseWindowListener() {
+				@Override
+				public void close(ExtendedWindowEvent event) {
+					IBrowser browser = (IBrowser)event.widget;
+					Shell shell = browser.getShell();
+					shell.close();
+				}
+			});
 		}
 	}
 }

@@ -18,6 +18,7 @@ import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.CloseWindowListener;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressEvent;
@@ -32,6 +33,7 @@ import com.sun.javafx.scene.web.Debugger;
 
 public class WebViewBrowser extends FXCanvas implements IBrowser {
 	private WebView webView;
+	private List<ExtendedCloseWindowListener> closeWindowListeners = new ArrayList<ExtendedCloseWindowListener>();
 	private List<LocationListener> locationListeners = new ArrayList<LocationListener>();
 	private List<TitleListener> titleListeners = new ArrayList<TitleListener>();
 	private List<StatusTextListener> statusTextListeners = new ArrayList<StatusTextListener>();
@@ -135,23 +137,53 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 			@Override
 			public WebEngine call(PopupFeatures popupFeatures) {// XXX: use popupFeatures
 				ExtendedWindowEvent event = new ExtendedWindowEvent(WebViewBrowser.this);
+				event.widget = WebViewBrowser.this;
+				// TODO: set event.display, etc.
+				
 				for (ExtendedOpenWindowListener openWindowListener : openWindowListeners) {
 					openWindowListener.open(event);
 				}
 				
-				WebViewBrowser popupWebViewBrowser = null;
-				if (event.browser instanceof WebViewBrowser) {
-					popupWebViewBrowser = (WebViewBrowser) event.browser;
-				}
-				if (popupWebViewBrowser != null && !popupWebViewBrowser.isDisposed()) {
-					for (ExtendedVisibilityWindowListener visibilityWindowListener : visibilityWindowListeners) {
-						visibilityWindowListener.show(event);
-					}
+				if (event.browser instanceof WebViewBrowser && !event.browser.isDisposed()) {
+					final WebViewBrowser popupWebViewBrowser = (WebViewBrowser) event.browser;
 					return popupWebViewBrowser.getEngine();
 				}
 				return null;
 			}
 		});
+		
+		getEngine().setOnVisibilityChanged(new EventHandler<WebEvent<Boolean>>() {
+			@Override
+			public void handle(WebEvent<Boolean> event) {
+				boolean shown = event.getData();
+				ExtendedWindowEvent extendedWindowEvent = new ExtendedWindowEvent(WebViewBrowser.this);
+				extendedWindowEvent.widget = WebViewBrowser.this;
+				// TODO: set event.display, etc.
+				if (shown) {
+					// window.open() is called
+					for (ExtendedVisibilityWindowListener visibilityWindowListener : visibilityWindowListeners) {
+						visibilityWindowListener.show(extendedWindowEvent);
+					}
+				} else {
+					// window.close() is called
+					for (ExtendedCloseWindowListener closeWindowListener : closeWindowListeners) {
+						if (!isDisposed()) {
+							closeWindowListener.close(extendedWindowEvent);
+						}
+					}
+				}
+			}
+		});
+	}
+	
+	@Override
+	public void addCloseWindowListener(ExtendedCloseWindowListener closeWindowListener) {
+		closeWindowListeners.add(closeWindowListener);
+	}
+
+	@Override
+	public void removeCloseWindowListener(ExtendedCloseWindowListener closeWindowListener) {
+		closeWindowListeners.remove(closeWindowListener);
 	}
 
 	@Override

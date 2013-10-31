@@ -11,6 +11,7 @@
 package org.jboss.tools.vpe.browsersim.browser;
 
 import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.browser.WindowEvent;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.graphics.*;
 
@@ -194,6 +195,24 @@ public class ExtendedWindowEvent extends TypedEvent {
  */
 public ExtendedWindowEvent(Widget widget) {
 	super(widget);
+}
+
+public ExtendedWindowEvent(WindowEvent event) {
+	this(event.widget);
+	this.addressBar = event.addressBar; 
+	this.data = event.data;       
+	this.display = event.display;    
+	this.location = event.location;   
+	this.menuBar = event.menuBar;    
+	this.required = event.required;   
+	this.size = event.size;       
+	this.statusBar = event.statusBar;  
+	this.time = event.time;       
+	this.toolBar = event.toolBar;
+
+	if (event.browser instanceof IBrowser) {
+		this.browser = (IBrowser) event.browser;
+	}
 }
 
 /**

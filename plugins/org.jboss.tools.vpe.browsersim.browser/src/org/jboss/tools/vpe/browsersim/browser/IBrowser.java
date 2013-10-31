@@ -4,11 +4,15 @@ import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.browser.StatusTextListener;
 import org.eclipse.swt.browser.TitleListener;
-import org.eclipse.swt.browser.VisibilityWindowListener;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 public interface IBrowser {
+	void addCloseWindowListener(ExtendedCloseWindowListener closeWindowListener);
+	void removeCloseWindowListener(ExtendedCloseWindowListener closeWindowListener);
+	void addDisposeListener(DisposeListener disposeListener); 
+	void removeDisposeListener(DisposeListener disposeListener); 
 	void addLocationListener(LocationListener locationListener);
 	void removeLocationListener(LocationListener liveReloadLocationAdapter);
 	void addOpenWindowListener(ExtendedOpenWindowListener listener);
