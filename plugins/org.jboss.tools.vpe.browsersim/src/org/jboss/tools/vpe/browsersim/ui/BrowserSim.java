@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.BrowserSimLogger;
 import org.jboss.tools.vpe.browsersim.BrowserSimRunner;
 import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
+import org.jboss.tools.vpe.browsersim.browser.ExtendedOpenWindowListener;
+import org.jboss.tools.vpe.browsersim.browser.ExtendedWindowEvent;
 import org.jboss.tools.vpe.browsersim.browser.IBrowserFunction;
 import org.jboss.tools.vpe.browsersim.browser.IDisposable;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
@@ -319,15 +321,15 @@ public class BrowserSim {
 			});
 		};
 
-//		browser.addOpenWindowListener(new OpenWindowListener() {
-//			public void open(WindowEvent event) {
-//				if (FireBugLiteLoader.isFireBugPopUp(event)) {
-//					FireBugLiteLoader.processFireBugPopUp(event, skin);
-//				} else {
-//					event.browser = browser;
-//				}
-//			}
-//		});
+		browser.addOpenWindowListener(new ExtendedOpenWindowListener() {
+			public void open(ExtendedWindowEvent event) {
+				if (FireBugLiteLoader.isFireBugPopUp(event)) {
+					FireBugLiteLoader.processFireBugPopUp(event, skin);
+				} else {
+					event.browser = browser;
+				}
+			}
+		});
 		
 		browser.addLocationListener(new LocationListener() {
 			private IDisposable scrollListener = null;

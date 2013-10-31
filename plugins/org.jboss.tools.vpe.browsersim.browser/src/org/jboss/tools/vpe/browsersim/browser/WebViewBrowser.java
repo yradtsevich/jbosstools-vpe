@@ -1,7 +1,6 @@
 package org.jboss.tools.vpe.browsersim.browser;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -15,12 +14,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swt.FXCanvas;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
 import javafx.scene.web.PopupFeatures;
 import javafx.scene.web.PromptData;
-import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebEvent;
-import javafx.scene.web.WebView;
 import javafx.util.Callback;
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
@@ -45,6 +41,7 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	private List<StatusTextListener> statusTextListeners = new ArrayList<StatusTextListener>();
 	private List<ExtendedOpenWindowListener> openWindowListeners = new ArrayList<ExtendedOpenWindowListener>();
 	private List<ProgressListener> progressListeners = new ArrayList<ProgressListener>();
+	private List<ExtendedVisibilityWindowListener> visibilityWindowListeners = new ArrayList<ExtendedVisibilityWindowListener>();
 	
 	Map<Class<?>, String> interfaceToOriginalMap = new HashMap<Class<?>, String>();
 	{
@@ -263,6 +260,9 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 					popupWebViewBrowser = (WebViewBrowser) event.browser;
 				}
 				if (popupWebViewBrowser != null && !popupWebViewBrowser.isDisposed()) {
+					for (ExtendedVisibilityWindowListener visibilityWindowListener : visibilityWindowListeners) {
+						visibilityWindowListener.show(event);
+					}
 					return popupWebViewBrowser.getEngine();
 				}
 				return null;
@@ -318,6 +318,16 @@ public class WebViewBrowser extends FXCanvas implements IBrowser {
 	@Override
 	public void removeTitleListener(TitleListener titleListener) {
 		titleListeners.remove(titleListener);
+	}
+	
+	@Override
+	public void addVisibilityWindowListener(ExtendedVisibilityWindowListener listener) {
+		visibilityWindowListeners.add(listener);		
+	}
+
+	@Override
+	public void removeVisibilityWindowListener(ExtendedVisibilityWindowListener listener) {
+		visibilityWindowListeners.remove(listener);
 	}
 
 	@Override
