@@ -59,6 +59,7 @@ import org.jboss.tools.vpe.browsersim.ui.events.ExitListener;
 import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeEvent;
 import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeListener;
 import org.jboss.tools.vpe.browsersim.ui.menu.BrowserSimMenuCreator;
+import org.jboss.tools.vpe.browsersim.ui.skin.AutomaticAdressBarHideable;
 import org.jboss.tools.vpe.browsersim.ui.skin.BrowserSimSkin;
 import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkinSizeAdvisor;
 import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkinSizeAdvisorImpl;
@@ -154,6 +155,7 @@ public class BrowserSim {
 		Display display = Display.getDefault();
 		
 		skin.createControls(display, location, parentShell);
+		skin.setAddressBarVisible(isAddressBarVisibleByDefault());
 		currentLocation = location;
 		
 		final Shell shell = skin.getShell();
@@ -294,7 +296,11 @@ public class BrowserSim {
 							skin.getShell().getDisplay().asyncExec(new Runnable() {
 								public void run() {
 									if (skin != null && skin.getShell() != null && !skin.getShell().isDisposed()) {
-										skin.setAddressBarVisible(false);
+										if (skin instanceof AutomaticAdressBarHideable) {
+											if (((AutomaticAdressBarHideable) skin).automaticallyHideAddressBar()) {
+												skin.setAddressBarVisible(false);
+											}
+										}
 									}
 								}
 							});
@@ -319,7 +325,11 @@ public class BrowserSim {
 			}
 			
 			public void changing(LocationEvent event) {
-				skin.setAddressBarVisible(true);
+				if (skin instanceof AutomaticAdressBarHideable) {
+					if (((AutomaticAdressBarHideable) skin).automaticallyHideAddressBar() && isAddressBarVisibleByDefault()) {
+						skin.setAddressBarVisible(true);
+					}
+				}
 			}
 		});
 
@@ -524,6 +534,10 @@ public class BrowserSim {
 	
 	public static List<BrowserSim> getInstances() {
 		return instances;
+	}
+	
+	protected boolean isAddressBarVisibleByDefault() {
+		return true;
 	}
 
 	/**
