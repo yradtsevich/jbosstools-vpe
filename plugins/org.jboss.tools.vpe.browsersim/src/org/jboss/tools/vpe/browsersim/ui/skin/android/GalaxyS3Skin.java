@@ -15,13 +15,14 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
+import org.jboss.tools.vpe.browsersim.ui.skin.AutomaticAdressBarHideable;
 import org.jboss.tools.vpe.browsersim.ui.skin.DeviceComposite;
 import org.jboss.tools.vpe.browsersim.ui.skin.ImageDescriptor;
 import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkin;
 import org.jboss.tools.vpe.browsersim.ui.skin.ios.ButtonDescriptor;
 
 @SuppressWarnings("nls")
-public class GalaxyS3Skin  extends ResizableSkin {
+public class GalaxyS3Skin  extends ResizableSkin implements AutomaticAdressBarHideable {
 	public static final String ANDROID_SKIN_ID = "Galaxy S III";
 
 	private static final int[] VISIBLE_REGION_VERTICAL = { 146, 0, 280, 0, 281, 1, 302, 1, 303, 2, 318, 2, 319, 3, 330,
@@ -174,5 +175,10 @@ public class GalaxyS3Skin  extends ResizableSkin {
 	@Override
 	protected DeviceComposite createDeviceComposite(Composite parent, boolean vertical) {
 		return new AndroidComposite(parent, vertical ? VERTICAL_DESCRIPTOR : HORIZONTAL_DESCRIPTOR);
+	}
+
+	@Override
+	public boolean automaticallyHideAddressBar() {
+		return true;
 	}
 }

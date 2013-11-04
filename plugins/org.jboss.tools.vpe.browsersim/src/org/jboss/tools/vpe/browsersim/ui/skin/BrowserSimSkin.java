@@ -37,4 +37,5 @@ public interface BrowserSimSkin {
 	void setOrientationAndSize(int orientation, Point browserSize, ResizableSkinSizeAdvisor sizeAdvisor);
 	void setAddressBarVisible(boolean visible);
 	void setContextMenu(Menu contextMenu);
+	
 }

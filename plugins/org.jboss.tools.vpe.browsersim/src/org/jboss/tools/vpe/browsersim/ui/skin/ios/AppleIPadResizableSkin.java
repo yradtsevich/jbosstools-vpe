@@ -15,6 +15,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
+import org.jboss.tools.vpe.browsersim.ui.skin.AutomaticAdressBarHideable;
 import org.jboss.tools.vpe.browsersim.ui.skin.DeviceComposite;
 import org.jboss.tools.vpe.browsersim.ui.skin.ImageDescriptor;
 import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkin;
@@ -23,7 +24,7 @@ import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkin;
  * @author Ilya Buziuk (ibuziuk)
  */
 @SuppressWarnings("nls")
-public class AppleIPadResizableSkin extends ResizableSkin {
+public class AppleIPadResizableSkin extends ResizableSkin implements AutomaticAdressBarHideable {
 	public static final String IPAD_SKIN_ID = "iPad";
 
 	private static final int[] VISIBLE_REGION_VERTICAL = { 37, 0, 341, 0, 342, 1, 346, 1, 347, 2, 349, 2, 350, 3, 352,
@@ -131,7 +132,8 @@ public class AppleIPadResizableSkin extends ResizableSkin {
 	}
 
 	@Override
-	public void setAddressBarVisible(boolean visible) {
-		return;
+	public boolean automaticallyHideAddressBar() {
+		return false;
 	}
+
 }

@@ -39,7 +39,7 @@ import org.jboss.tools.vpe.browsersim.util.BrowserSimResourcesUtil;
 /**
  * @author Yahor Radtsevich (yradtsevich)
  */
-public class NativeSkin implements BrowserSimSkin {
+public class NativeSkin implements BrowserSimSkin, AutomaticAdressBarHideable {
 	private ProgressBar progressBar;
 	private Label statusLabel;
 	private Text locationText;
@@ -339,6 +339,11 @@ public class NativeSkin implements BrowserSimSkin {
 	@Override
 	public void setContextMenu(Menu contextMenu) {
 		// not supported
+	}
+
+	@Override
+	public boolean automaticallyHideAddressBar() {
+		return false;
 	}
 	
 }

@@ -15,6 +15,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.widgets.Composite;
+import org.jboss.tools.vpe.browsersim.ui.skin.AutomaticAdressBarHideable;
 import org.jboss.tools.vpe.browsersim.ui.skin.DeviceComposite;
 import org.jboss.tools.vpe.browsersim.ui.skin.ImageDescriptor;
 import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkin;
@@ -23,7 +24,7 @@ import org.jboss.tools.vpe.browsersim.ui.skin.ResizableSkin;
  * @author Yahor Radtsevich (yradtsevich)
  */
 @SuppressWarnings("nls")
-public class AppleIPhone4ResizableSkin extends ResizableSkin {
+public class AppleIPhone4ResizableSkin extends ResizableSkin implements AutomaticAdressBarHideable {
 	public static final String IPHONE4_SKIN_ID = "iPhone 4";
 	
 	private static final int[] VISIBLE_REGION_VERTICAL = {40, 0, 254, 0, 255, 1, 261, 1, 262, 2, 265, 2, 266, 3, 267, 3,
@@ -130,5 +131,10 @@ public class AppleIPhone4ResizableSkin extends ResizableSkin {
 			skinDescriptor = HORIZONTAL_DESCRIPTOR;
 		}
 		return new AppleIPhoneComposite(parent, skinDescriptor);
+	}
+
+	@Override
+	public boolean automaticallyHideAddressBar() {
+		return true;
 	}
 }
