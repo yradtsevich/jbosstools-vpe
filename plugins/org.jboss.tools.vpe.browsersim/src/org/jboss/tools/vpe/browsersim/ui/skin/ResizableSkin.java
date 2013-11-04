@@ -323,6 +323,8 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 		deviceComposite.setMenu(contextMenu);
 	}
 	
+	
+	
 	@Override
 	public void statusTextChanged(String newStatusText) {
 		// not supported		
@@ -362,7 +364,7 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 	}
 	
 	protected abstract DeviceComposite createDeviceComposite(Composite parent, boolean vertical);
-	
+		
 	private int[] getNormalRegion(boolean vertical) {
 		return vertical ? visibleRegionVertical : visibleRegionHorizontal;
 	}
