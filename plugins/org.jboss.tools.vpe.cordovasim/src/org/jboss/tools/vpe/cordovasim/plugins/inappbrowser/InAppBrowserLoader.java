@@ -59,7 +59,8 @@ public class InAppBrowserLoader {
 				browserSimBrowser.setParent(browserSimParentComposite);
 				inAppBrowser.dispose();
 				browserSimParentComposite.layout();		
-				rippleToolSuiteBrowser.execute("ripple('event').trigger('browser-close');"); // fire 'exit' event
+				rippleToolSuiteBrowser.execute("ripple('event').trigger('browser-close');"); // fire 'exit' for inAppBrowser
+				rippleToolSuiteBrowser.execute("ripple('emulatorBridge').window().ChildBrowser.onClose();"); // fire 'close' for childBrowser
 			}
 		});
 		
@@ -76,13 +77,9 @@ public class InAppBrowserLoader {
 			
 			@Override
 			public void changing(LocationEvent event) {
-				if (isChildBrowserPluginPlugged(rippleToolSuiteBrowser)) {
-					rippleToolSuiteBrowser
-							.execute("ripple('emulatorBridge').window().ChildBrowser.onLocationChange('"
-									+ event.location + "');"); // fire 'ChildBrowser.onLocationChange' event
-				} else {
-					rippleToolSuiteBrowser.execute("ripple('event').trigger('browser-start');"); // fire 'loadstart' event
-				}
+				rippleToolSuiteBrowser.execute("ripple('emulatorBridge').window().ChildBrowser.onLocationChange('"
+						+ event.location + "');"); // fire 'ChildBrowser.onLocationChange' event
+				rippleToolSuiteBrowser.execute("ripple('event').trigger('browser-start');"); // fire 'loadstart' event
 			}
 			
 			@Override
@@ -106,11 +103,6 @@ public class InAppBrowserLoader {
 		inAppBrowser.setLayoutData(browserSimBrowser.getLayoutData());
 		return inAppBrowser;
 	}
-
-	@SuppressWarnings("nls")
-	private static boolean isChildBrowserPluginPlugged(Browser browser) {
-		return (Boolean) browser.evaluate("return !! ripple('emulatorBridge').window().ChildBrowser");
-	}
-
+	
 }
 
