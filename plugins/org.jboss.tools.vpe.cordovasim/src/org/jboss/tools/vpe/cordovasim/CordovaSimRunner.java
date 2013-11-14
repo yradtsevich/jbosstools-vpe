@@ -183,8 +183,13 @@ public class CordovaSimRunner {
 			browserSim.setRippleToolBarBrowser(rippleToolSuiteBrowser);
 			browserSim.open(sp, null);
 			browserSim.addSkinChangeListener(new SkinChangeListener() {
+				@SuppressWarnings("nls")
 				@Override
 				public void skinChanged(SkinChangeEvent event) {
+					Browser browserSimBrowser = browserSim.getBrowser();
+					if (browserSimBrowser != null && !browserSimBrowser.isDisposed()) {
+						browserSimBrowser.execute("window.prompt = console.log"); // JBIDE-14636
+					}
 					rippleToolSuiteBrowser.refresh();
 				}
 			});
