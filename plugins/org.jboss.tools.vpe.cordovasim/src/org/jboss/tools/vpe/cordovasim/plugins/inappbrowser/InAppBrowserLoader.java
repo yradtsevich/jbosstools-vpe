@@ -51,6 +51,7 @@ public class InAppBrowserLoader {
 		openWindowEvent.browser = inAppBrowser;  
 		browserSimParentComposite.layout();
 	
+		BrowserSimUtil.setCustomScrollbarStyles(inAppBrowser);
 		inAppBrowser.addCloseWindowListener(new CloseWindowListener() {			
 			
 			@Override
@@ -85,8 +86,6 @@ public class InAppBrowserLoader {
 			@Override
 			public void changed(LocationEvent event) {
 				if (event.top) {
-					Browser browser = (Browser) event.widget;
-					BrowserSimUtil.setCustomScrollbarStyles(browser);
 					rippleToolSuiteBrowser.execute("ripple('event').trigger('browser-stop');"); //  fire 'loadstop' event
 				}
 			}

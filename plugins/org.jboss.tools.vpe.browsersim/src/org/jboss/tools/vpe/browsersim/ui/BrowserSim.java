@@ -17,7 +17,6 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.LocationAdapter;
@@ -44,7 +43,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.BrowserSimLogger;
 import org.jboss.tools.vpe.browsersim.BrowserSimRunner;
 import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
-import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.model.preferences.BrowserSimSpecificPreferencesStorage;
@@ -259,18 +257,8 @@ public class BrowserSim {
 		});
 
 		//JBIDE-12191 - custom scrollbars work satisfactorily on windows only
-		if (PlatformUtil.OS_WIN32.equals(PlatformUtil.getOs())) {
-			browser.addLocationListener(new LocationAdapter() {
-				@Override
-				public void changed(LocationEvent event) {
-					Browser browser = (Browser) event.widget;
-					BrowserSimUtil.setCustomScrollbarStyles(browser);
-				}
-				
-
-			});
-		};
-
+		BrowserSimUtil.setCustomScrollbarStyles(browser);
+		
 		browser.addOpenWindowListener(new OpenWindowListener() {
 			public void open(WindowEvent event) {
 				if (FireBugLiteLoader.isFireBugPopUp(event)) {
