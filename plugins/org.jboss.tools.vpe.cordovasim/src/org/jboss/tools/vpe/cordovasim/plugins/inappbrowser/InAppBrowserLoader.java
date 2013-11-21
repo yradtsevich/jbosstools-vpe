@@ -16,10 +16,12 @@ import org.eclipse.swt.browser.CloseWindowListener;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.browser.WindowEvent;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.jboss.tools.vpe.browsersim.browser.BrowserSimBrowser;
+import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.util.BrowserSimUtil;
@@ -38,42 +40,44 @@ public class InAppBrowserLoader {
 	
 	@SuppressWarnings("nls")
 	public static void processInAppBrowser(final Browser rippleToolSuiteBrowser, final CustomBrowserSim browserSim, WindowEvent openWindowEvent) {
+		final String currentOs = PlatformUtil.getOs();
 		rippleToolSuiteBrowser.execute("window.needToOpenInAppBrowser = false"); 
 		
 		final Browser browserSimBrowser = browserSim.getBrowser();
 		final Composite browserSimParentComposite = browserSimBrowser.getParent();
+		final StackLayout stackLayout = (StackLayout) browserSimParentComposite.getLayout();
 		Device device = browserSim.getCurrentDevice();
 		
-		final BrowserSimBrowser inAppBrowser = createInAppBrowser(browserSimParentComposite, browserSimBrowser, device); 
+		final BrowserSimBrowser inAppBrowser = createInAppBrowser(browserSimParentComposite,  device); 
 		browserSim.setInAppBrowser(inAppBrowser);
+
+		if (PlatformUtil.OS_WIN32.equals(currentOs)) {
+			browserSimBrowser.setParent(inAppBrowser);
+		}
 		
-		browserSimBrowser.setParent(inAppBrowser); // hiding browserSim's browser by changing it's parent   
 		openWindowEvent.browser = inAppBrowser;  
+		stackLayout.topControl = inAppBrowser;
 		browserSimParentComposite.layout();
-	
+			
 		BrowserSimUtil.setCustomScrollbarStyles(inAppBrowser);
+		
 		inAppBrowser.addCloseWindowListener(new CloseWindowListener() {			
 			
 			@Override
 			public void close(WindowEvent event) {
 				browserSim.setInAppBrowser(null);
-				browserSimBrowser.setParent(browserSimParentComposite);
+				if (PlatformUtil.OS_WIN32.equals(currentOs)) {
+					browserSimBrowser.setParent(inAppBrowser);
+				}				
+				stackLayout.topControl = browserSimBrowser;
+				browserSimParentComposite.layout();	
 				inAppBrowser.dispose();
-				browserSimParentComposite.layout();		
 				rippleToolSuiteBrowser.execute("ripple('event').trigger('browser-close');"); // fire 'exit' for inAppBrowser
 				rippleToolSuiteBrowser.execute("ripple('emulatorBridge').window().ChildBrowser.onClose();"); // fire 'close' for childBrowser
 			}
 		});
 		
-		inAppBrowser.addDisposeListener(new DisposeListener() { // prevent permanent crashes on windows after skin changing
-			
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				browserSimBrowser.setParent(browserSimParentComposite);
-				browserSimParentComposite.layout();		
-			}
-		});
-		
+
 		inAppBrowser.addLocationListener(new LocationListener() {
 			
 			@Override
@@ -92,14 +96,24 @@ public class InAppBrowserLoader {
 			
 		});
 				
+		if (PlatformUtil.OS_WIN32.equals(currentOs)) { // prevent permanent crashes after skin changing on windows
+			inAppBrowser.addDisposeListener(new DisposeListener() {
+				
+				@Override
+				public void widgetDisposed(DisposeEvent event) {
+					browserSimBrowser.setParent(browserSimParentComposite);
+					stackLayout.topControl = browserSimBrowser;
+					browserSimParentComposite.layout();	
+				}
+			});
+		}
+		
 		new ExecScriptFunction(browserSimBrowser, inAppBrowser, "csInAppExecScript");
 	}
-
-	private static BrowserSimBrowser createInAppBrowser(Composite browserSimParentComposite, Browser browserSimBrowser,
-			Device device) {
+	
+	private static BrowserSimBrowser createInAppBrowser(Composite browserSimParentComposite, Device device) {
 		BrowserSimBrowser inAppBrowser = new WebKitBrowserFactory().createBrowser(browserSimParentComposite, SWT.NONE);
 		inAppBrowser.setDefaultUserAgent(device.getUserAgent());
-		inAppBrowser.setLayoutData(browserSimBrowser.getLayoutData());
 		return inAppBrowser;
 	}
 	
