@@ -65,10 +65,7 @@ public class InAppBrowserLoader {
 			
 			@Override
 			public void close(WindowEvent event) {
-				browserSim.setInAppBrowser(null);
-				if (PlatformUtil.OS_WIN32.equals(currentOs)) {
-					browserSimBrowser.setParent(inAppBrowser);
-				}				
+				browserSim.setInAppBrowser(null);			
 				stackLayout.topControl = browserSimBrowser;
 				browserSimParentComposite.layout();	
 				inAppBrowser.dispose();
